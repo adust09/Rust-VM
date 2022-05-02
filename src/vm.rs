@@ -49,8 +49,9 @@ impl VM {
                 return false;
             }
             Opcode::IGL => {
-                error!("Illegal instruction encountered");
-                return Some(1);
+                // error!("Illegal instruction encountered");
+                // return Some(1);
+                return false;
             }
             Opcode::ADD => {
                 let register1 = self.registers[self.next_8_bits() as usize];
@@ -80,6 +81,10 @@ impl VM {
             Opcode::JMPF => {
                 let value = self.registers[self.next_8_bits() as usize] as usize;
                 self.pc += value;
+            }
+            Opcode::JMPB => {
+                let value = self.registers[self.next_8_bits() as usize] as usize;
+                self.pc -= value;
             }
             Opcode::EQ => {
                 let register1 = self.registers[self.next_8_bits() as usize];
