@@ -1,5 +1,4 @@
 use crate::instruction::Opcode;
-use std;
 
 #[derive(Clone, Debug)]
 pub struct VM {
@@ -89,7 +88,7 @@ impl VM {
             Opcode::EQ => {
                 let register1 = self.registers[self.next_8_bits() as usize];
                 let register2 = self.registers[self.next_8_bits() as usize];
-                if (register1 == register2) {
+                if register1 == register2 {
                     self.equal_flag = true;
                 } else {
                     self.equal_flag = false;
@@ -112,7 +111,7 @@ impl VM {
             Opcode::NEQ => {
                 let register1 = self.registers[self.next_8_bits() as usize];
                 let register2 = self.registers[self.next_8_bits() as usize];
-                if (register1 != register2) {
+                if register1 != register2 {
                     self.equal_flag = false;
                 } else {
                     self.equal_flag = true;
@@ -121,7 +120,7 @@ impl VM {
             Opcode::GTE => {
                 let register1 = self.registers[self.next_8_bits() as usize];
                 let register2 = self.registers[self.next_8_bits() as usize];
-                if (register1 >= register2) {
+                if register1 >= register2 {
                     self.equal_flag = true;
                 } else {
                     self.equal_flag = false;
@@ -167,6 +166,23 @@ impl VM {
         test_vm.registers[1] = 10;
         test_vm
     }
+
+    // fn parse_hex(&mut self, i: &str) -> Result<Vec<u8>, ParseIntError> {
+    //     let split = i.split(" ").collect::<Vec<&str>>();
+    //     let mut results: Vec<u8> = vec![];
+    //     for hex_string in split {
+    //         let byte = u8::from_str_radix(&hex_string, 16);
+    //         match byte {
+    //             Ok(result) => {
+    //                 results.push(result);
+    //             }
+    //             Err(e) => {
+    //                 return Err(e);
+    //             }
+    //         }
+    //     }
+    //     Ok(results)
+    // }
 }
 
 #[cfg(test)]
