@@ -1,3 +1,5 @@
+use nom::types::CompleteStr;
+
 #[derive(Debug, PartialEq)]
 pub enum Opcode {
     HLT,

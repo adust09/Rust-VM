@@ -85,7 +85,6 @@ impl VM {
                 let value = self.registers[self.next_8_bits() as usize] as usize;
                 self.pc -= value;
             }
-
             Opcode::EQ => {
                 let register1 = self.registers[self.next_8_bits() as usize];
                 let register2 = self.registers[self.next_8_bits() as usize];
