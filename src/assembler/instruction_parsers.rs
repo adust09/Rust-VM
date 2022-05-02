@@ -42,10 +42,9 @@ impl AssemblerInstruction {
             }
         };
 
-        for operand in vec![&self.operand1, &self.operand2, &self.operand3] {
-            match operand {
-                Some(t) => AssemblerInstruction::extract_operand(t, &mut results),
-                None => {}
+        for operand in &[&self.operand1, &self.operand2, &self.operand3] {
+            if let Some(token) = operand {
+                AssemblerInstruction::extract_operand(token, &mut results)
             }
         }
 
@@ -85,13 +84,12 @@ mod tests {
             Ok((
                 CompleteStr(""),
                 AssemblerInstruction {
-                    label: None,
-                    opcode: Token::Opcode { code: Opcode::LOAD },
+                    opcode: Token::Op { code: Opcode::LOAD },
                     operand1: Some(Token::Register { reg_num: 0 }),
-                    operand2: Some(Token::IntegerOperand { value: 100 }),
+                    operand2: Some(Token::Number { value: 100 }),
                     operand3: None
                 }
             ))
-        )
+        );
     }
 }
