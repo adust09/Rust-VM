@@ -43,7 +43,18 @@ impl REPL {
                     }
                 }
                 _ => {
-                    println!("Invalid input");
+                    let parsed_program = program(CompleteStr(buffer));
+                    if !parsed_program.is_ok() {
+                        println!("Unable to parse input");
+                        continue;
+                    }
+                    let (_, result) = parsed_program.unwrap();
+                    let bytecode = result.to_bytes();
+                    // TODO: Make a function to let us add bytes to the VM
+                    for byte in bytecode {
+                        self.vm.add_byte(byte);
+                    }
+                    self.vm.run_once();
                 }
             }
         }

@@ -33,6 +33,10 @@ impl VM {
         self.execute_instruction();
     }
 
+    pub fn add_byte(&mut self, b: u8) {
+        self.program.push(b);
+    }
+
     fn execute_instruction(&mut self) -> bool {
         if self.pc >= self.program.len() {
             return false;
