@@ -2,9 +2,10 @@ use crate::instruction::Opcode;
 
 #[derive(Clone, Debug)]
 pub struct VM {
-    registers: [i32; 32],
-    program: Vec<u8>,
+    pub registers: [i32; 32],
     pc: usize,
+    pub program: Vec<u8>,
+    heap: Vec<u8>,
     remainder: u32,
     equal_flag: bool,
 }
@@ -14,6 +15,7 @@ impl VM {
         VM {
             registers: [0; 32],
             program: vec![],
+            heap: vec![],
             pc: 0,
             remainder: 0,
             equal_flag: false,
@@ -156,6 +158,12 @@ impl VM {
                 self.next_8_bits();
                 self.next_8_bits();
             }
+            Opcode::ALOC => {
+                let register = self.next_8_bits() as usize;
+                let bytes = self.registers[register];
+                let new_end = self.heap.len() as i32 + bytes;
+                self.heap.resize(new_end as usize, 0);
+            }
         }
         return true;
     }
@@ -261,5 +269,14 @@ mod tests {
         assert_eq!(opcode, Opcode::LOAD);
         let opcode = Opcode::from(CompleteStr("illegal"));
         assert_eq!(opcode, Opcode::IGL);
+    }
+
+    #[test]
+    fn test_aloc_opcode() {
+        let mut test_vm = VM::get_test_vm();
+        test_vm.registers[0] = 1024;
+        test_vm.program = vec![17, 0, 0, 0];
+        test_vm.run_once();
+        assert_eq!(test_vm.heap.len(), 1024);
     }
 }

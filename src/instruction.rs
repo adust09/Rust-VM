@@ -20,6 +20,7 @@ pub enum Opcode {
     GT,
     JMPE,
     NOP,
+    ALOC,
 }
 
 #[derive(Debug, PartialEq)]
@@ -53,7 +54,7 @@ impl From<Opcode> for u8 {
             Opcode::GT => 14,
             Opcode::JMPE => 15,
             Opcode::NOP => 16,
-
+            Opcode::ALOC => 17,
             Opcode::IGL => 100,
         }
     }
@@ -79,6 +80,7 @@ impl From<u8> for Opcode {
             14 => Opcode::GT,
             15 => Opcode::JMPE,
             16 => Opcode::NOP,
+            17 => Opcode::ALOC,
             _ => Opcode::IGL,
         }
     }
@@ -104,6 +106,7 @@ impl<'a> From<CompleteStr<'a>> for Opcode {
             CompleteStr("lt") => Opcode::LT,
             CompleteStr("jmpe") => Opcode::JMPE,
             CompleteStr("nop") => Opcode::NOP,
+            CompleteStr("aloc") => Opcode::ALOC,
             _ => Opcode::IGL,
         }
     }
