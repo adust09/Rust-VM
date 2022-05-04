@@ -18,6 +18,8 @@ pub enum Opcode {
     LTE,
     LT,
     GT,
+    JMPE,
+    NOP,
 }
 
 #[derive(Debug, PartialEq)]
@@ -28,22 +30,6 @@ pub struct Instruction {
 impl Instruction {
     pub fn new(opcode: Opcode) -> Instruction {
         Instruction { opcode }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_create_hlt() {
-        let opcode = Opcode::HLT;
-    }
-
-    #[test]
-    fn test_create_instruction() {
-        let instruction = Instruction::new(Opcode::HLT);
-        assert_eq!(instruction.opcode, Opcode::HLT);
     }
 }
 
@@ -65,6 +51,9 @@ impl From<Opcode> for u8 {
             Opcode::LTE => 12,
             Opcode::LT => 13,
             Opcode::GT => 14,
+            Opcode::JMPE => 15,
+            Opcode::NOP => 16,
+
             Opcode::IGL => 100,
         }
     }
@@ -88,36 +77,54 @@ impl From<u8> for Opcode {
             12 => Opcode::LTE,
             13 => Opcode::LT,
             14 => Opcode::GT,
+            15 => Opcode::JMPE,
+            16 => Opcode::NOP,
             _ => Opcode::IGL,
         }
     }
 }
 
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
+impl<'a> From<CompleteStr<'a>> for Opcode {
+    fn from(v: CompleteStr<'a>) -> Self {
+        match v {
+            CompleteStr("load") => Opcode::LOAD,
+            CompleteStr("add") => Opcode::ADD,
+            CompleteStr("sub") => Opcode::SUB,
+            CompleteStr("mul") => Opcode::MUL,
+            CompleteStr("div") => Opcode::DIV,
+            CompleteStr("hlt") => Opcode::HLT,
+            CompleteStr("jmp") => Opcode::JMP,
+            CompleteStr("jmpf") => Opcode::JMPF,
+            CompleteStr("jmpb") => Opcode::JMPB,
+            CompleteStr("eq") => Opcode::EQ,
+            CompleteStr("neq") => Opcode::NEQ,
+            CompleteStr("gte") => Opcode::GTE,
+            CompleteStr("gt") => Opcode::GT,
+            CompleteStr("lte") => Opcode::LTE,
+            CompleteStr("lt") => Opcode::LT,
+            CompleteStr("jmpe") => Opcode::JMPE,
+            CompleteStr("nop") => Opcode::NOP,
+            _ => Opcode::IGL,
+        }
+    }
+}
 
-//     #[test]
-//     fn tedt_create_vm() {
-//         let test_vm = VM::new();
-//         assert_eq!(test_vm.registersp[0], 0)
-//     }
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::vm::VM;
 
-//     #[test]
-//     fn test_opcode_hly() {
-//         let mut test_vm = VM::new();
-//         let test_bytes = vec![0, 0, 0, 0];
-//         test_vm.program = test_bytes;
-//         test_vm.run();
-//         assert_eq!(test_vm.pc, 1);
-//     }
+    #[test]
+    fn test_create_instruction() {
+        let instruction = Instruction::new(Opcode::HLT);
+        assert_eq!(instruction.opcode, Opcode::HLT);
+    }
 
-//     #[test]
-//     fn test_opcode_igl() {
-//         let mut test_vm = VM::new();
-//         let test_bytes = vec![200, 0, 0, 0];
-//         test_vm.program = test_bytes;
-//         test_vm.run();
-//         assert_eq!(test_vm.pc, 1);
-//     }
-// }
+    #[test]
+    fn test_str_to_opcode() {
+        let opcode = Opcode::from(CompleteStr("load"));
+        assert_eq!(opcode, Opcode::LOAD);
+        let opcode = Opcode::from(CompleteStr("illegal"));
+        assert_eq!(opcode, Opcode::IGL);
+    }
+}

@@ -2,6 +2,7 @@ use assembler::opcode_parsers::*;
 use assembler::operand_parsers::integer_operand;
 use assembler::register_parsers::register;
 use assembler::Token;
+use nom::multispace;
 
 #[derive(Debug, PartialEq)]
 pub struct AssemblerInstruction {
@@ -11,18 +12,29 @@ pub struct AssemblerInstruction {
     operand3: Option<Token>,
 }
 
-named!(pub instruction_one<CompleteStr, AssemblerInstruction>,
+named!(instruction_one<CompleteStr, AssemblyInstruction>,
     do_parse!(
-        o: opcode_load >>
-        r: register >>
-        i: integer_operand >>
+        o: opcode >>
+        opt!(multispace) >>
         (
-            AssemblerInstruction{
+            AssemblyInstruction{
                 opcode: o,
-                operand1: Some(r),
-                operand2: Some(i),
-                operand3: None
+                operand1: None,
+                operand2: None,
+                operand3: None,
             }
+        )
+    )
+);
+/// Will try to parse out any of the Instruction forms
+named!(pub instruction<CompleteStr, AssemblerInstruction>,
+    do_parse!(
+        ins: alt!(
+            instruction_one |
+            instruction_two
+        ) >>
+        (
+            ins
         )
     )
 );
@@ -87,6 +99,23 @@ mod tests {
                     opcode: Token::Op { code: Opcode::LOAD },
                     operand1: Some(Token::Register { reg_num: 0 }),
                     operand2: Some(Token::Number { value: 100 }),
+                    operand3: None
+                }
+            ))
+        );
+    }
+
+    #[test]
+    fn test_parse_instruction_form_two() {
+        let result = instruction_two(CompleteStr("hlt\n"));
+        assert_eq!(
+            result,
+            Ok((
+                CompleteStr(""),
+                AssemblerInstruction {
+                    opcode: Token::Op { code: Opcode::HLT },
+                    operand1: None,
+                    operand2: None,
                     operand3: None
                 }
             ))
