@@ -138,6 +138,20 @@ impl VM {
                 self.equal_flag = register1 <= register2;
                 self.next_8_bits();
             }
+            Opcode::JMPE => {
+                if self.equal_flag {
+                    let register = self.next_8_bits() as usize;
+                    let target = self.registers[register];
+                    self.pc = target as usize;
+                } else {
+                    // TODO: Fix the bits
+                }
+            }
+            Opcode::NOP => {
+                self.next_8_bits();
+                self.next_8_bits();
+                self.next_8_bits();
+            }
         }
         return true;
     }
@@ -188,6 +202,7 @@ impl VM {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use nom::types::CompleteStr;
 
     #[test]
     fn test_create_vm() {
@@ -233,5 +248,13 @@ mod tests {
         test_vm.program = vec![16, 0, 0, 0, 17, 0, 0, 0, 17, 0, 0, 0];
         test_vm.run_once();
         assert_eq!(test_vm.pc, 7);
+    }
+
+    #[test]
+    fn test_str_to_opcode() {
+        let opcode = Opcode::from(CompleteStr("load"));
+        assert_eq!(opcode, Opcode::LOAD);
+        let opcode = Opcode::from(CompleteStr("illegal"));
+        assert_eq!(opcode, Opcode::IGL);
     }
 }
