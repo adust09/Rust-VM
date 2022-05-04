@@ -26,7 +26,7 @@ named!(instruction_one<CompleteStr, AssemblyInstruction>,
         )
     )
 );
-\/// Will try to parse out any of the Instruction forms
+/// Will try to parse out any of the Instruction forms
 named!(pub instruction<CompleteStr, AssemblerInstruction>,
     do_parse!(
         ins: alt!(
@@ -38,7 +38,6 @@ named!(pub instruction<CompleteStr, AssemblerInstruction>,
         )
     )
 );
-
 
 impl AssemblerInstruction {
     pub fn to_bytes(&self) -> Vec<u8> {

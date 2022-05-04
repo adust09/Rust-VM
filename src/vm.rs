@@ -33,6 +33,10 @@ impl VM {
         self.execute_instruction();
     }
 
+    pub fn add_byte(&mut self, b: u8) {
+        self.program.push(b);
+    }
+
     fn execute_instruction(&mut self) -> bool {
         if self.pc >= self.program.len() {
             return false;
@@ -181,6 +185,7 @@ impl VM {
         test_vm
     }
 
+    // #[allow(dead_code)]
     // fn parse_hex(&mut self, i: &str) -> Result<Vec<u8>, ParseIntError> {
     //     let split = i.split(" ").collect::<Vec<&str>>();
     //     let mut results: Vec<u8> = vec![];
