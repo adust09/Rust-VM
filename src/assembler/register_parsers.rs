@@ -3,7 +3,7 @@ use crate::instruction::Opcode;
 use nom::types::CompleteStr;
 use nom::*;
 
-named!(register <CompleteStr, Token>,
+named!(pub register <CompleteStr, Token>,
     ws!(
         do_parse!(
             tag!("$") >>
@@ -17,6 +17,8 @@ named!(register <CompleteStr, Token>,
     )
 );
 mod tests {
+    #![allow(unused_imports)]
+
     use super::register;
     use nom::types::CompleteStr;
 

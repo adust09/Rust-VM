@@ -6,10 +6,12 @@ use nom::multispace;
 
 #[derive(Debug, PartialEq)]
 pub struct AssemblerInstruction {
-    opcode: Token,
-    operand1: Option<Token>,
-    operand2: Option<Token>,
-    operand3: Option<Token>,
+    pub opcode: Option<Token>,
+    pub label: Option<Token>,
+    pub directive: Option<Token>,
+    pub operand1: Option<Token>,
+    pub operand2: Option<Token>,
+    pub operand3: Option<Token>,
 }
 
 named!(instruction_one<CompleteStr, AssemblyInstruction>,
@@ -82,6 +84,69 @@ impl AssemblerInstruction {
         };
     }
 }
+
+named!(instruction_combined<CompleteStr, AssemblerInstruction>,
+    do_parse!(
+        l:opt!(label_declaration) >>
+        o:opcode >>
+        o1:opt!(operand) >>
+        o2:opt!(operand) >>
+        o3:opt!(operand) >>
+        (
+            AssemblerInstruction{
+                opcode: Some(o),
+                lavel: l,
+                directive: None,
+                operand1: o1,
+                operand2: o2,
+                operand3: o3,
+            }
+        )
+    )
+);
+
+named!(directive_declaration<CompleteStr, Token>,
+    do_parse!(
+        tag!(".") >>
+        name: alpha1 >>
+        (
+            Token::Direction{name: name.to_string()}
+        )
+     )
+);
+
+named!(directive_combined<CompleteStr, AssemblerINstruction>,
+    ws!(
+        do_parse!(
+            tag!(".") >>
+            name: directive_declaration >>
+            o1: opt!(operand) >>
+            o2: opt!(operand) >>
+            o2: opt!(operand) >>
+            (
+                AssemblerInstruction{
+                    opcode: None,
+                    label: None,
+                    operand1: o1,
+                    operand2: o2,
+                    operand3: o3,
+                }
+            )
+        )
+    )
+);
+
+/// Will try to parse out any of the Directive forms
+named!(pub directive<CompleteStr, AssemlerInstruction>,
+    do_parse!(
+        ins: alt!(
+            directive_combined
+        ) >>
+        (
+            ins
+        )
+    )
+);
 
 #[cfg(test)]
 mod tests {
