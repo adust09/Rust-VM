@@ -1,3 +1,5 @@
+use assembler::register_parsers::register;
+
 use crate::assembler::Token;
 // use crate::assembler::label_parsers::label_usage;
 use crate::assembler::register_parsers::register;
@@ -29,8 +31,6 @@ named!(integer_operand<CompleteStr, Token>,
         )
     )
 );
-
-
 
 
 #[test]

@@ -9,11 +9,30 @@ pub enum Token {
     Op { code: Opcode },
     Register { reg_num: u8 },
     IntegerOperand { value: i32 },
+    LabelDeclaration { name: String },
+    LabelUsage { name: String },
+    Directive { name: String },
 }
 
+#[derive(Debug)]
+pub struct Assembler {
+    phase: AssemblerPhase,
+}
 
-// Don't forget to add this at the top of the file too
-use assembler::PIE_HEADER_PREFIX;
+#[derive(Debug)]
+pub struct Assembler {
+    pub phase: AssemblerPhase,
+    pub symbols: SymbolTable
+}
+
+impl Assembler {
+    pub fn new() -> Assembler {
+        Assembler {
+            phase: AssemblerPhase::First,
+            symbols: SymbolTable::new()
+        }
+    }
+}
 
 pub fn assemble(&mut self, raw: &str) -> Option<Vec<u8>> {
     match program(CompleteStr(raw)) {
@@ -148,3 +167,4 @@ fn write_pie_header(&self) -> Vec<u8>{
     }
     header
 }
+

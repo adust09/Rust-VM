@@ -60,12 +60,12 @@ impl VM {
             }
             Opcode::HLT => {
                 println!("HLT encountered");
-                return false;
+                return true;
             }
             Opcode::IGL => {
                 // error!("Illegal instruction encountered");
                 // return Some(1);
-                return false;
+                return true;
             }
             Opcode::ADD => {
                 let register1 = self.registers[self.next_8_bits() as usize];
@@ -174,7 +174,7 @@ impl VM {
                 self.heap.resize(new_end as usize, 0);
             }
         }
-        return true;
+        return false;
     }
 
     fn decode_opcode(&mut self) -> Opcode {

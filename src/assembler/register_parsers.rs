@@ -18,6 +18,8 @@ named!(pub register <CompleteStr, Token>,
 );
 
 mod tests {
+    #![allow(unused_imports)]
+
     use super::register;
     use nom::types::CompleteStr;
 
