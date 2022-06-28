@@ -1,5 +1,14 @@
 use crate::instruction::Opcode;
 
+use std::io::Cursor;
+use std::net::SocketAddr;
+use std::sync::{Arc, RwLock};
+use std::thread;
+
+use assembler::{PIE_HEADER_LENGTH, PIE_HEADER_PREFIX};
+
+
+
 #[derive(Clone, Debug)]
 pub struct VM {
     pub registers: [i32; 32],
@@ -210,6 +219,26 @@ impl VM {
     //     }
     //     Ok(results)
     // }
+fn verify_header(&self)->bool{
+    if self.program[0..4] != PIE_HEADER_PREFIX{
+        return false;
+    }
+    true
+}
+
+fn prepend_header(mut b: Vec<u8>) -> Vec<u8>{
+    let mut prepension = vec![];
+    for byte in PIE_HEADER_PREFIX.into_inter(){
+        prepension.push(byte.clone());
+    }
+    while prepension.len() <= PIE_HEADER_LENGTH{
+        prepension.push(0);
+    }
+    prepension.append(&mut b);
+    prepension
+}
+
+
 }
 
 #[cfg(test)]
@@ -278,5 +307,14 @@ mod tests {
         test_vm.program = vec![17, 0, 0, 0];
         test_vm.run_once();
         assert_eq!(test_vm.heap.len(), 1024);
+    }
+
+    #[test]
+    fn test_mul_opcode() {
+        let mut test_vm = VM::get_test_vm();
+        test_vm.program = vec![3, 0, 1, 2];
+        test_vm.program = prepend_header(test_vm.program);
+        test_vm.run();
+        assert_eq!(test_vm.registers[2], 50);
     }
 }

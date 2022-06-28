@@ -12,10 +12,11 @@ named!(pub register <CompleteStr, Token>,
                 Token::Register{
                   reg_num: reg_num.parse::<u8>().unwrap()
                 }
-            ) <10>
+            )
         )
     )
 );
+
 mod tests {
     #![allow(unused_imports)]
 
