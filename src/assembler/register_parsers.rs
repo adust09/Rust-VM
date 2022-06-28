@@ -3,7 +3,7 @@ use crate::instruction::Opcode;
 use nom::types::CompleteStr;
 use nom::*;
 
-named!(register <CompleteStr, Token>,
+named!(pub register <CompleteStr, Token>,
     ws!(
         do_parse!(
             tag!("$") >>
@@ -12,10 +12,11 @@ named!(register <CompleteStr, Token>,
                 Token::Register{
                   reg_num: reg_num.parse::<u8>().unwrap()
                 }
-            ) <10>
+            )
         )
     )
 );
+
 mod tests {
     use super::register;
     use nom::types::CompleteStr;
