@@ -1,10 +1,21 @@
-use nom::tpes::CompleteStr;
+use crate::assembler::directive_parsers::directive;
+use crate::assembler::instruction_parsers::{instruction_one, Assemblerinstruction};
 
-use assembler::instruction_parsers::{instruction_one, Assemblerinstruction};
+use nom::types::CompleteStr;
 
 #[derive(Debug, PartialEq)]
 pub struct Program {
-    instruction: Vec<AssemblerInstruction>,
+    instructions: Vec<AssemblerInstruction>,
+}
+
+impl Program {
+    pub fn to_bytes(&self) -> Vec<u8> {
+        let mut progoram = vec![];
+        for instruction in &self.instruction {
+            progoram.append(&mut instruction.to_bytes());
+        }
+        program
+    }
 }
 
 named!(pub program<CompleteStr, Program>,
@@ -18,15 +29,7 @@ named!(pub program<CompleteStr, Program>,
     )
 );
 
-impl Program {
-    pub fn to_bytes(&self) -> Vec<u8> {
-        let mut progoram = vec![];
-        for instruction in &self.instruction {
-            progoram.append(&mut instruction.to_bytes());
-        }
-        program
-    }
-}
+
 
 #[test]
 fn test_parse_program() {
