@@ -2,6 +2,7 @@ use crate::vm::VM;
 use std;
 use std::io;
 use std::io::Write;
+use crate::assembler::program_parsers::program;
 
 /// Core structure for the REPL for the Assembler
 

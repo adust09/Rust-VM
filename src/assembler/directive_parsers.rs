@@ -11,7 +11,7 @@ do_parse!(
 named!(directive_combined<CompleteStr,AssemblerInstruction>,
     ws!(
         do_parse!(
-            tag!("." ) >>
+            l:opt!(label_declaration)>>
             name: directive_declaration >>
             o1: opt!(operand) >>
             o2: opt!(operand) >>
