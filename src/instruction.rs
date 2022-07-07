@@ -1,14 +1,15 @@
 use nom::types::CompleteStr;
 
-#[derive(Debug, PartialEq)]
+/// Represents an opcode, which tells our interpreter what to do with the following operands
+/// Opcodes are a nice way to represent each of our Opcodes
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Opcode {
-    HLT,
-    IGL,
     LOAD,
     ADD,
     SUB,
     MUL,
     DIV,
+    HLT,
     JMP,
     JMPF,
     JMPB,
@@ -21,45 +22,14 @@ pub enum Opcode {
     JMPE,
     NOP,
     ALOC,
+    INC,
+    DEC,
+    DJMPE,
+    IGL,
+    PRTS
 }
 
-#[derive(Debug, PartialEq)]
-pub struct Instruction {
-    opcode: Opcode,
-}
-
-impl Instruction {
-    pub fn new(opcode: Opcode) -> Instruction {
-        Instruction { opcode }
-    }
-}
-
-impl From<Opcode> for u8 {
-    fn from(op: Opcode) -> Self {
-        match op {
-            Opcode::LOAD => 0,
-            Opcode::ADD => 1,
-            Opcode::SUB => 2,
-            Opcode::MUL => 3,
-            Opcode::DIV => 4,
-            Opcode::HLT => 5,
-            Opcode::JMP => 6,
-            Opcode::JMPF => 7,
-            Opcode::JMPB => 8,
-            Opcode::EQ => 9,
-            Opcode::NEQ => 10,
-            Opcode::GTE => 11,
-            Opcode::LTE => 12,
-            Opcode::LT => 13,
-            Opcode::GT => 14,
-            Opcode::JMPE => 15,
-            Opcode::NOP => 16,
-            Opcode::ALOC => 17,
-            Opcode::IGL => 100,
-        }
-    }
-}
-
+/// We implement this trait to make it easy to convert from a u8 to an Opcode
 impl From<u8> for Opcode {
     fn from(v: u8) -> Self {
         match v {
@@ -81,11 +51,16 @@ impl From<u8> for Opcode {
             15 => Opcode::JMPE,
             16 => Opcode::NOP,
             17 => Opcode::ALOC,
-            _ => Opcode::IGL,
+            18 => Opcode::INC,
+            19 => Opcode::DEC,
+            20 => Opcode::DJMPE,
+            21 => Opcode::PRTS,
+            _ => Opcode::IGL
         }
     }
 }
 
+/// Convenience function to convert nom CompleteStr into an opcode
 impl<'a> From<CompleteStr<'a>> for Opcode {
     fn from(v: CompleteStr<'a>) -> Self {
         match v {
@@ -107,15 +82,37 @@ impl<'a> From<CompleteStr<'a>> for Opcode {
             CompleteStr("jmpe") => Opcode::JMPE,
             CompleteStr("nop") => Opcode::NOP,
             CompleteStr("aloc") => Opcode::ALOC,
+            CompleteStr("inc") => Opcode::INC,
+            CompleteStr("dec") => Opcode::DEC,
+            CompleteStr("djmpe") => Opcode::DJMPE,
+            CompleteStr("prts") => Opcode::PRTS,
             _ => Opcode::IGL,
         }
+    }
+}
+
+/// Represents a combination of an opcode and operands for the VM to execute
+#[derive(Debug, PartialEq)]
+pub struct Instruction {
+    opcode: Opcode,
+}
+
+impl Instruction {
+    /// Creates and returns a new Instruction
+    pub fn new(opcode: Opcode) -> Instruction {
+        Instruction { opcode }
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::vm::VM;
+
+    #[test]
+    fn test_create_hlt() {
+        let opcode = Opcode::HLT;
+        assert_eq!(opcode, Opcode::HLT);
+    }
 
     #[test]
     fn test_create_instruction() {
