@@ -6,6 +6,7 @@ use assembler::PIE_HEADER_PREFIX;
 
 /// Virtual machine struct that will execute bytecode
 #[derive(Default)]
+
 pub struct VM {
     /// Array that simulates having hardware registers
     pub registers: [i32; 32],
@@ -296,6 +297,7 @@ fn prepend_header(mut b: Vec<u8>) -> Vec<u8> {
         prepension.push(byte.clone());
     }
     while prepension.len() < PIE_HEADER_LENGTH {
+
         prepension.push(0);
     }
     prepension.append(&mut b);

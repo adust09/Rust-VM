@@ -176,6 +176,7 @@ impl Assembler {
         self.symbols.add_symbol(symbol);
     }
 
+
     fn process_directive(&mut self, i: &AssemblerInstruction) {
         // First let's make sure we have a parseable name
         let directive_name = match i.get_directive_name() {
@@ -187,6 +188,7 @@ impl Assembler {
                 return;
             }
         };
+
 
         // Now check if there were any operands.
         if i.has_operands() {
