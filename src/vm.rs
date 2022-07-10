@@ -39,11 +39,11 @@ impl VM {
 
     /// Wraps execution in a loop so it will continue to run until done or there is an error
     /// executing instructions.
-    pub fn run(&mut self) {
+    pub fn run(&mut self) -> u32{
         // TODO: Should setup custom errors here
         if !self.verify_header() {
             println!("Header was incorrect");
-            std::process::exit(1);
+            return 1;
         }
         // If the header is valid, we need to change the PC to be at bit 65.
         self.pc = 65;
@@ -51,6 +51,7 @@ impl VM {
         while !is_done {
             is_done = self.execute_instruction();
         }
+        0
     }
 
     /// Executes one instruction. Meant to allow for more controlled execution of the VM
@@ -288,18 +289,19 @@ mod tests {
         test_vm.registers[1] = 10;
         test_vm
     }
-
-    fn prepend_header(mut b: Vec<u8>) -> Vec<u8> {
-        let mut prepension = vec![];
-        for byte in PIE_HEADER_PREFIX.into_iter() {
-            prepension.push(byte.clone());
-        }
-        while prepension.len() <= PIE_HEADER_LENGTH {
-            prepension.push(0);
-        }
-        prepension.append(&mut b);
-        prepension
+    
+fn prepend_header(mut b: Vec<u8>) -> Vec<u8> {
+    let mut prepension = vec![];
+    for byte in PIE_HEADER_PREFIX.into_iter() {
+        prepension.push(byte.clone());
     }
+    while prepension.len() < PIE_HEADER_LENGTH {
+        prepension.push(0);
+    }
+    prepension.append(&mut b);
+    prepension
+}
+
 
     #[test]
     fn test_create_vm() {
