@@ -1,7 +1,7 @@
-use crate::assembler::Token;
-use crate::instruction::Opcode;
+use nom::digit;
 use nom::types::CompleteStr;
-use nom::*;
+
+use assembler::Token;
 
 named!(pub register <CompleteStr, Token>,
     ws!(
@@ -19,7 +19,6 @@ named!(pub register <CompleteStr, Token>,
 
 mod tests {
     #![allow(unused_imports)]
-
     use super::register;
     use nom::types::CompleteStr;
 
