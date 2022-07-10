@@ -1,6 +1,6 @@
 [package]
 name = "iridium"
-version = "0.0.1"
+version = "0.0.17"
 authors = ["Fletcher Haynes <fletcher@subnetzero.io>"]
 description = "A high level, dynamic language written in Rust."
 license = "MIT"
@@ -13,10 +13,11 @@ clap = { version = "2.32", features = ["yaml"] }
 log = "0.4"
 env_logger = "0.5.13"
 byteorder = "1"
+uuid = { version = "0.7", features = ["v4"] }
+chrono = "0.4"
 
 [profile.dev]
 opt-level = 0
 
 [profile.release]
 opt-level = 3
-
