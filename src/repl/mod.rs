@@ -13,6 +13,7 @@ use std::path::Path;
 use assembler::program_parsers::program;
 use assembler::Assembler;
 use nom::types::Input;
+
 use scheduler::Scheduler;
 use vm::VM;
 /// Core structure for the REPL for the Assembler
@@ -73,6 +74,36 @@ impl REPL {
                     .program
                     .append(&mut program.to_bytes(&self.asm.symbols));
                 self.vm.run_once();
+            }
+        }
+    }
+
+    fn get_data_from_load(&mut self) -> Option<String> {
+        let stdin = io::stdin();
+        print!("Please enter the path to the file you wish to load: ");
+        io::stdout().flush().expect("Unable to flush stdout");
+        let mut tmp = String::new();
+
+        stdin
+            .read_line(&mut tmp)
+            .expect("Unable to read line from user");
+        println!("Attempting to load program from file...");
+
+        let tmp = tmp.trim();
+        let filename = Path::new(&tmp);
+        let mut f = match File::open(&filename) {
+            Ok(f) => f,
+            Err(e) => {
+                println!("There was an error opening that file: {:?}", e);
+                return None;
+            }
+        };
+        let mut contents = String::new();
+        match f.read_to_string(&mut contents) {
+            Ok(_bytes_read) => Some(contents),
+            Err(e) => {
+                println!("there was an error reading that file: {:?}", e);
+                None
             }
         }
     }
