@@ -1,22 +1,26 @@
+pub mod command_parser;
+
+use nom::types::CompleteStr;
+use repl::command_parser::CommandParser;
 use std;
-use std::io;
-use std::io::Write;
-use std::io::prelude::*;
 use std::fs::File;
+use std::io;
+use std::io::prelude::*;
+use std::io::Write;
 use std::num::ParseIntError;
 use std::path::Path;
-use scheduler::Scheduler;
 
 use assembler::program_parsers::program;
 use assembler::Assembler;
+use nom::types::Input;
+use scheduler::Scheduler;
 use vm::VM;
-
 /// Core structure for the REPL for the Assembler
 pub struct REPL {
     command_buffer: Vec<String>,
     vm: VM,
     asm: Assembler,
-    scheduler: Scheduler
+    scheduler: Scheduler,
 }
 
 impl REPL {
@@ -26,7 +30,7 @@ impl REPL {
             vm: VM::new(),
             command_buffer: vec![],
             asm: Assembler::new(),
-            scheduler: Scheduler::new()
+            scheduler: Scheduler::new(),
         }
     }
 
@@ -51,94 +55,54 @@ impl REPL {
             stdin
                 .read_line(&mut buffer)
                 .expect("Unable to read line from user");
-            let buffer = buffer.trim();
-            self.command_buffer.push(buffer.to_string());
-            match buffer {
-                ".quit" => {
-                    println!("Farewell! Have a great day!");
-                    std::process::exit(0);
-                }
-                ".history" => {
-                    for command in &self.command_buffer {
-                        println!("{}", command);
-                    }
-                }
-                ".program" => {
-                    println!("Listing instructions currently in VM's program vector:");
-                    for instruction in &self.vm.program {
-                        println!("{}", instruction);
-                    }
-                    println!("End of Program Listing");
-                }
-                ".clear_program" => {
-                    println!("Removing all bytes from VM's program vector...");
-                    self.vm.program.truncate(0);
-                    println!("Done!");
-                }
-                ".clear_registers" => {
-                    println!("Setting all registers to 0");
-                    for i in 0..self.vm.registers.len() {
-                        self.vm.registers[i] = 0;
-                    }
-                    println!("Done!");
-                }
-                ".registers" => {
-                    println!("Listing registers and all contents:");
-                    println!("{:#?}", self.vm.registers);
-                    println!("End of Register Listing")
-                }
-                ".symbols" => {
-                    println!("Listing symbols table:");
-                    println!("{:#?}", self.asm.symbols);
-                    println!("End of Symbols Listing");
-                }
-                ".load_file" => {
-                    print!("Please enter the path to the file you wish to load: ");
-                    io::stdout().flush().expect("Unable to flush stdout");
-                    let mut tmp = String::new();
-                    stdin.read_line(&mut tmp).expect("Unable to read line from user");
-                    println!("Attempting to load program from file...");
-                    let tmp = tmp.trim();
-                    let filename = Path::new(&tmp);
-                    let mut f = match File::open(&filename){
-                        Ok(f) => {f}
-                        Err(e) => {
-                            println!("There was an error opening that file: {:?}", e);
-                            continue;
-                        }
-                    };
-                    let mut contents = String::new();
-                    f.read_to_string(&mut contents).expect("There was an error reading from the file");
-                    match self.asm.assemble(&contents) {
-                        Ok(mut assembled_program) => {
-                            println!("Sending assembled program to VM");
-                            self.vm.program.append(&mut assembled_program);
-                            println!("{:#?}", self.vm.program);
-                            self.vm.run();
-                        },
-                        Err(errors) => {
-                            for error in errors {
-                                println!("Unable to parse input: {}", error);
-                            }
-                            continue;
-                        }
-                    }
-                }
-                _ => {
-                    let program = match program(buffer.into()) {
-                        // Rusts pattern matching is pretty powerful an can even be nested
-                        Ok((_remainder, program)) => {
-                            program
-                        },
-                        Err(e) => {
-                            println!("Unable to parse input: {:?}", e);
-                            continue;
-                        }
-                    };
 
-                    self.vm.program.append(&mut program.to_bytes(&self.asm.symbols));
-                    self.vm.run_once();
-                }
+            let historical_copy = buffer.clone();
+            self.command_buffer.push(historical_copy);
+
+            if buffer.starts_with("!") {
+                self.execute_command(&buffer);
+            } else {
+                let program = match program(CompleteStr(&buffer)) {
+                    Ok((_remainder, program)) => program,
+                    Err(e) => {
+                        println!("Unable to parse input: {:?}", e);
+                        continue;
+                    }
+                };
+                self.vm
+                    .program
+                    .append(&mut program.to_bytes(&self.asm.symbols));
+                self.vm.run_once();
+            }
+        }
+    }
+
+    fn get_data_from_load(&mut self) -> Option<String> {
+        let stdin = io::stdin();
+        print!("Please enter the path to the file you wish to load: ");
+        io::stdout().flush().expect("Unable to flush stdout");
+        let mut tmp = String::new();
+
+        stdin
+            .read_line(&mut tmp)
+            .expect("Unable to read line from user");
+        println!("Attempting to load program from file...");
+
+        let tmp = tmp.trim();
+        let filename = Path::new(&tmp);
+        let mut f = match File::open(&filename) {
+            Ok(f) => f,
+            Err(e) => {
+                println!("There was an error opening that file: {:?}", e);
+                return None;
+            }
+        };
+        let mut contents = String::new();
+        match f.read_to_string(&mut contents) {
+            Ok(_bytes_read) => Some(contents),
+            Err(e) => {
+                println!("there was an error reading that file: {:?}", e);
+                None
             }
         }
     }
@@ -170,50 +134,20 @@ impl Default for REPL {
     }
 }
 
-fn get_data_from_load(&mut self) -> Option<String> {
-    let stdin = io::stdin();
-    print!("Please enter the path to the file you wish to load: ");
-    io::stdout().flush().expect("Unable to flush stdout");
-    let mut tmp = String::new();
-
-    stdin.read_line(&mut tmp).expect("Unable to read line from user");
-    println!("Attempting to load program from file...");
-
-    let tmp = tmp.trim();
-    let filename = Path::new(&tmp);
-    let mut f = match File::open(&filename) {
-        Ok(f) => { f }
-        Err(e) => {
-            println!("There was an error opening that file: {:?}", e);
-            return None;
+fn execute_command(&mut self, input: &str) {
+    let args = CommandParser::tokenize(input);
+    match args[0] {
+        "!quit" => self.quit(&args[1..]),
+        "!history" => self.history(&args[1..]),
+        "!program" => self.program(&args[1..]),
+        "!clear_program" => self.clear_program(&args[1..]),
+        "!clear_registers" => self.clear_registers(&args[1..]),
+        "!registers" => self.registers(&args[1..]),
+        "!symbols" => self.symbols(&args[1..]),
+        "!load_file" => self.load_file(&args[1..]),
+        "!spawn" => self.spawn(&args[1..]),
+        _ => {
+            println!("Invalid command")
         }
     };
-    let mut contents = String::new();
-match f.read_to_string(&mut contents) {
-    Ok(_bytes_read) => {
-        Some(contents)
-    },
-    Err(e) => {
-        println!("there was an error reading that file: {:?}", e);
-        None
-    }
-}
-}
-
-".spwan" => {
-    let contents = self.get_data_from_load();
-    if let Some(contents) = contents {
-        match self.asm.adssemble(&contents) {
-                println!("Sending assembled program to VM");
-                self.vm.program.append(&mut assembled_program);
-                println!("{:#?}", self.vm.program);
-                self.scheduler.get_thread(self.vm.clone());
-        },
-        Err(errors) = >{
-            for error in errors {
-                println!("Unable to parse input: {}", error);
-            }
-            continue;
-        }       
-    }else{ continue; }
 }
