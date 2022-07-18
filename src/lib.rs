@@ -12,3 +12,8 @@ pub mod instruction;
 pub mod repl;
 pub mod scheduler;
 pub mod vm;
+
+extern crate futures;
+extern crate thrussh;
+extern crate thrussh_keys;
+extern crate tokio;

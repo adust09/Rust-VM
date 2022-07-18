@@ -76,7 +76,7 @@ impl Assembler {
         match program(CompleteStr(raw)) {
             Ok((_remainder, program)) => {
                 // First get the header so we can smush it into the bytecode letter
-                let mut assembled_program = self.write_pie_header();
+                let assembled_program = self.write_pie_header();
 
                 let mut body = self.process_second_phase(&program);
                 let mut assembled_program = self.write_pie_header();
