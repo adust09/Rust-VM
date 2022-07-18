@@ -15,6 +15,7 @@ env_logger = "0.5.13"
 byteorder = "1"
 uuid = { version = "0.7", features = ["v4"] }
 chrono = "0.4"
+num_cpus = "1.0"
 
 [profile.dev]
 opt-level = 0
