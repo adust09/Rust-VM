@@ -1,7 +1,7 @@
 use nom::types::CompleteStr;
 
-use assembler::instruction_parsers::{instruction, AssemblerInstruction};
 use assembler::directive_parsers::directive;
+use assembler::instruction_parsers::{instruction, AssemblerInstruction};
 use assembler::SymbolTable;
 
 #[derive(Debug, PartialEq)]
@@ -61,4 +61,11 @@ mod tests {
         let result = program(test_program);
         assert_eq!(result.is_ok(), true);
     }
+}
+
+#[test]
+fn test_parse_program() {
+    let test_program = CompleteStr("1+2");
+    let result = program(test_program);
+    assert_eq!(result.is_ok(), true);
 }
