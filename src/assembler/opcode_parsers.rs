@@ -1,23 +1,20 @@
-use nom::types::CompleteStr;
-use nom::*;
-
 use assembler::Token;
 use instruction::Opcode;
+use nom::types::CompleteStr;
+use nom::*;
 
 named!(pub opcode<CompleteStr, Token>,
   do_parse!(
       opcode: alpha1 >>
       (
-        {
-            Token::Op{code: Opcode::from(opcode)}
-        }
+        Token::Op{code: Opcode::from(opcode)}
       )
   )
 );
 
-
 mod tests {
     #![allow(unused_imports)]
+
     use super::opcode;
     use assembler::Token;
     use instruction::Opcode;

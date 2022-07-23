@@ -3,10 +3,12 @@ use std::io::Cursor;
 
 use byteorder::{LittleEndian, ReadBytesExt};
 use chrono::prelude::*;
+use num_cpus;
 use uuid::Uuid;
 
 use assembler::{PIE_HEADER_LENGTH, PIE_HEADER_PREFIX};
 use instruction::Opcode;
+use std::f64::EPSILON;
 
 #[derive(Clone, Debug)]
 pub enum VMEventType {
@@ -28,6 +30,8 @@ pub const DEFAULT_HEAP_STARTING_SIZE: usize = 64;
 pub struct VM {
     /// Array that simulates having hardware registers
     pub registers: [i32; 32],
+    /// Array that simulates having floating point hardware registers
+    pub float_registers: [f64; 32],
     /// Program counter that tracks which byte is being executed
     pc: usize,
     /// The bytecode of the program being run
@@ -44,6 +48,7 @@ pub struct VM {
     id: Uuid,
     /// Keeps a list of events for a particular VM
     events: Vec<VMEvent>,
+    /// Number of logical cores the system reports
     pub logical_cores: usize,
 }
 
@@ -52,6 +57,7 @@ impl VM {
     pub fn new() -> VM {
         VM {
             registers: [0; 32],
+            float_registers: [0.0; 32],
             program: vec![],
             ro_data: vec![],
             heap: vec![0; DEFAULT_HEAP_STARTING_SIZE],
@@ -264,6 +270,86 @@ impl VM {
                     Err(e) => println!("Error decoding string for prts instruction: {:#?}", e),
                 };
             }
+            // Begin floating point 64-bit instructions
+            Opcode::LOADF64 => {
+                let register = self.next_8_bits() as usize;
+                let number = f64::from(self.next_16_bits());
+                self.float_registers[register] = number;
+            }
+            Opcode::ADDF64 => {
+                let register1 = self.float_registers[self.next_8_bits() as usize];
+                let register2 = self.float_registers[self.next_8_bits() as usize];
+                self.float_registers[self.next_8_bits() as usize] = register1 + register2;
+            }
+            Opcode::SUBF64 => {
+                let register1 = self.float_registers[self.next_8_bits() as usize];
+                let register2 = self.float_registers[self.next_8_bits() as usize];
+                self.float_registers[self.next_8_bits() as usize] = register1 - register2;
+            }
+            Opcode::MULF64 => {
+                let register1 = self.float_registers[self.next_8_bits() as usize];
+                let register2 = self.float_registers[self.next_8_bits() as usize];
+                self.float_registers[self.next_8_bits() as usize] = register1 * register2;
+            }
+            Opcode::DIVF64 => {
+                let register1 = self.float_registers[self.next_8_bits() as usize];
+                let register2 = self.float_registers[self.next_8_bits() as usize];
+                self.float_registers[self.next_8_bits() as usize] = register1 / register2;
+            }
+            Opcode::EQF64 => {
+                let register1 = self.float_registers[self.next_8_bits() as usize];
+                let register2 = self.float_registers[self.next_8_bits() as usize];
+                self.equal_flag = (register1 - register2).abs() < EPSILON;
+                self.next_8_bits();
+            }
+            Opcode::NEQF64 => {
+                let register1 = self.float_registers[self.next_8_bits() as usize];
+                let register2 = self.float_registers[self.next_8_bits() as usize];
+                self.equal_flag = (register1 - register2).abs() > EPSILON;
+                self.next_8_bits();
+            }
+            Opcode::GTF64 => {
+                let register1 = self.float_registers[self.next_8_bits() as usize];
+                let register2 = self.float_registers[self.next_8_bits() as usize];
+                self.equal_flag = register1 > register2;
+                self.next_8_bits();
+            }
+            Opcode::GTEF64 => {
+                let register1 = self.float_registers[self.next_8_bits() as usize];
+                let register2 = self.float_registers[self.next_8_bits() as usize];
+                self.equal_flag = register1 >= register2;
+                self.next_8_bits();
+            }
+            Opcode::LTF64 => {
+                let register1 = self.float_registers[self.next_8_bits() as usize];
+                let register2 = self.float_registers[self.next_8_bits() as usize];
+                self.equal_flag = register1 < register2;
+                self.next_8_bits();
+            }
+            Opcode::LTEF64 => {
+                let register1 = self.float_registers[self.next_8_bits() as usize];
+                let register2 = self.float_registers[self.next_8_bits() as usize];
+                self.equal_flag = register1 <= register2;
+                self.next_8_bits();
+            }
+            Opcode::SHL => {
+                let reg_num = self.next_8_bits() as usize;
+                let num_bits = match self.next_8_bits() {
+                    0 => 16,
+                    other => other,
+                };
+                self.registers[reg_num] = self.registers[reg_num].wrapping_shl(num_bits.into());
+                self.next_8_bits();
+            }
+            Opcode::SHR => {
+                let reg_num = self.next_8_bits() as usize;
+                let num_bits = match self.next_8_bits() {
+                    0 => 16,
+                    other => other,
+                };
+                self.registers[reg_num] = self.registers[reg_num].wrapping_shr(num_bits.into());
+                self.next_8_bits();
+            }
         };
         None
     }
@@ -272,12 +358,14 @@ impl VM {
         let mut test_vm = VM::new();
         test_vm.registers[0] = 5;
         test_vm.registers[1] = 10;
+        test_vm.float_registers[0] = 5.0;
+        test_vm.float_registers[1] = 10.0;
         test_vm
     }
 
     pub fn prepend_header(mut b: Vec<u8>) -> Vec<u8> {
         let mut prepension = vec![];
-        for byte in PIE_HEADER_PREFIX {
+        for byte in &PIE_HEADER_PREFIX {
             prepension.push(byte.clone());
         }
 
@@ -469,7 +557,7 @@ mod tests {
     }
 
     #[test]
-    fn test_gt_opcode() {
+    fn test_lte_opcode() {
         let mut test_vm = VM::get_test_vm();
         test_vm.registers[0] = 20;
         test_vm.registers[1] = 10;
@@ -485,7 +573,7 @@ mod tests {
     }
 
     #[test]
-    fn test_lte_opcode() {
+    fn test_lt_opcode() {
         let mut test_vm = VM::get_test_vm();
         test_vm.registers[0] = 20;
         test_vm.registers[1] = 10;
@@ -501,7 +589,7 @@ mod tests {
     }
 
     #[test]
-    fn test_lt_opcode() {
+    fn test_gt_opcode() {
         let mut test_vm = VM::get_test_vm();
         test_vm.registers[0] = 20;
         test_vm.registers[1] = 10;
@@ -542,5 +630,158 @@ mod tests {
         test_vm.program = vec![21, 0, 0, 0];
         test_vm.run_once();
         // TODO: How can we validate the output since it is just printing to stdout in a test?
+    }
+
+    #[test]
+    fn test_load_floating_point_opcode() {
+        let mut test_vm = VM::get_test_vm();
+        test_vm.program = vec![22, 0, 1, 244];
+        test_vm.program = VM::prepend_header(test_vm.program);
+        test_vm.run();
+        assert_eq!(test_vm.float_registers[0], 500.0);
+    }
+
+    #[test]
+    fn test_add_floating_point_opcode() {
+        let mut test_vm = VM::get_test_vm();
+        test_vm.program = vec![23, 0, 1, 2];
+        test_vm.program = VM::prepend_header(test_vm.program);
+        test_vm.run();
+        assert_eq!(test_vm.float_registers[2], 15.0);
+    }
+
+    #[test]
+    fn test_sub_floating_point_opcode() {
+        let mut test_vm = VM::get_test_vm();
+        test_vm.program = vec![24, 1, 0, 2];
+        test_vm.program = VM::prepend_header(test_vm.program);
+        test_vm.run();
+        assert_eq!(test_vm.float_registers[2], 5.0);
+    }
+
+    #[test]
+    fn test_mul_floating_point_opcode() {
+        let mut test_vm = VM::get_test_vm();
+        test_vm.program = vec![25, 1, 0, 2];
+        test_vm.program = VM::prepend_header(test_vm.program);
+        test_vm.run();
+        assert_eq!(test_vm.float_registers[2], 50.0);
+    }
+
+    #[test]
+    fn test_div_floating_point_opcode() {
+        let mut test_vm = VM::get_test_vm();
+        test_vm.program = vec![26, 1, 0, 2];
+        test_vm.program = VM::prepend_header(test_vm.program);
+        test_vm.run();
+        assert_eq!(test_vm.float_registers[2], 2.0);
+    }
+
+    #[test]
+    fn test_eq_floating_point_opcode() {
+        let mut test_vm = VM::get_test_vm();
+        test_vm.float_registers[0] = 10.0;
+        test_vm.float_registers[1] = 10.0;
+        test_vm.program = vec![27, 0, 1, 0, 27, 0, 1, 0];
+        test_vm.run_once();
+        assert_eq!(test_vm.equal_flag, true);
+        test_vm.float_registers[1] = 20.0;
+        test_vm.run_once();
+        assert_eq!(test_vm.equal_flag, false);
+    }
+
+    #[test]
+    fn test_neq_floating_point_opcode() {
+        let mut test_vm = VM::get_test_vm();
+        test_vm.float_registers[0] = 10.0;
+        test_vm.float_registers[1] = 20.0;
+        test_vm.program = vec![28, 0, 1, 0, 28, 0, 1, 0];
+        test_vm.run_once();
+        assert_eq!(test_vm.equal_flag, true);
+        test_vm.float_registers[1] = 10.0;
+        test_vm.run_once();
+        assert_eq!(test_vm.equal_flag, false);
+    }
+
+    #[test]
+    fn test_gt_floating_point_opcode() {
+        let mut test_vm = VM::get_test_vm();
+        test_vm.float_registers[0] = 20.0;
+        test_vm.float_registers[1] = 10.0;
+        test_vm.program = vec![29, 0, 1, 0, 29, 0, 1, 0, 29, 0, 1, 0];
+        test_vm.run_once();
+        assert_eq!(test_vm.equal_flag, true);
+        test_vm.float_registers[0] = 10.0;
+        test_vm.run_once();
+        assert_eq!(test_vm.equal_flag, false);
+        test_vm.float_registers[0] = 5.0;
+        test_vm.run_once();
+        assert_eq!(test_vm.equal_flag, false);
+    }
+
+    #[test]
+    fn test_gte_floating_point_opcode() {
+        let mut test_vm = VM::get_test_vm();
+        test_vm.float_registers[0] = 20.0;
+        test_vm.float_registers[1] = 10.0;
+        test_vm.program = vec![30, 0, 1, 0, 30, 0, 1, 0, 30, 0, 1, 0];
+        test_vm.run_once();
+        assert_eq!(test_vm.equal_flag, true);
+        test_vm.float_registers[0] = 10.0;
+        test_vm.run_once();
+        assert_eq!(test_vm.equal_flag, true);
+        test_vm.float_registers[0] = 5.0;
+        test_vm.run_once();
+        assert_eq!(test_vm.equal_flag, false);
+    }
+
+    #[test]
+    fn test_lt_floating_point_opcode() {
+        let mut test_vm = VM::get_test_vm();
+        test_vm.float_registers[0] = 20.0;
+        test_vm.float_registers[1] = 10.0;
+        test_vm.program = vec![31, 0, 1, 0, 31, 0, 1, 0, 31, 0, 1, 0];
+        test_vm.run_once();
+        assert_eq!(test_vm.equal_flag, false);
+        test_vm.float_registers[0] = 10.0;
+        test_vm.run_once();
+        assert_eq!(test_vm.equal_flag, false);
+        test_vm.float_registers[0] = 5.0;
+        test_vm.run_once();
+        assert_eq!(test_vm.equal_flag, true);
+    }
+
+    #[test]
+    fn test_lte_floating_point_opcode() {
+        let mut test_vm = VM::get_test_vm();
+        test_vm.float_registers[0] = 20.0;
+        test_vm.float_registers[1] = 10.0;
+        test_vm.program = vec![32, 0, 1, 0, 32, 0, 1, 0, 32, 0, 1, 0];
+        test_vm.run_once();
+        assert_eq!(test_vm.equal_flag, false);
+        test_vm.float_registers[0] = 10.0;
+        test_vm.run_once();
+        assert_eq!(test_vm.equal_flag, true);
+        test_vm.float_registers[0] = 5.0;
+        test_vm.run_once();
+        assert_eq!(test_vm.equal_flag, true);
+    }
+
+    #[test]
+    fn test_shl_opcode() {
+        let mut test_vm = VM::get_test_vm();
+        test_vm.program = vec![33, 0, 0, 0];
+        assert_eq!(5, test_vm.registers[0]);
+        test_vm.run_once();
+        assert_eq!(327680, test_vm.registers[0]);
+    }
+
+    #[test]
+    fn test_shr_opcode() {
+        let mut test_vm = VM::get_test_vm();
+        test_vm.program = vec![34, 0, 0, 0];
+        assert_eq!(5, test_vm.registers[0]);
+        test_vm.run_once();
+        assert_eq!(0, test_vm.registers[0]);
     }
 }

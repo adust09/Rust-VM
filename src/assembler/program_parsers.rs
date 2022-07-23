@@ -1,8 +1,7 @@
-use nom::types::CompleteStr;
-
 use assembler::directive_parsers::directive;
 use assembler::instruction_parsers::{instruction, AssemblerInstruction};
 use assembler::SymbolTable;
+use nom::types::CompleteStr;
 
 #[derive(Debug, PartialEq)]
 pub struct Program {
@@ -24,7 +23,7 @@ named!(pub program<CompleteStr, Program>,
         instructions: many1!(alt!(instruction | directive)) >>
         (
             Program {
-                instructions: instructions
+                instructions
             }
         )
     )
@@ -61,11 +60,4 @@ mod tests {
         let result = program(test_program);
         assert_eq!(result.is_ok(), true);
     }
-}
-
-#[test]
-fn test_parse_program() {
-    let test_program = CompleteStr("1+2");
-    let result = program(test_program);
-    assert_eq!(result.is_ok(), true);
 }

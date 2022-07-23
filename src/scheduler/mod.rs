@@ -1,5 +1,4 @@
 use std::thread;
-
 use vm::{VMEvent, VM};
 
 #[derive(Default)]
@@ -27,5 +26,30 @@ impl Scheduler {
             }
             events
         })
+    }
+
+    pub fn get_next_pid(&self) -> u32 {
+        self.next_pid
+    }
+
+    pub fn get_max_pid(&self) -> u32 {
+        self.max_pid
+    }
+
+    fn _next_pid(&mut self) -> u32 {
+        let result = self.next_pid;
+        self.next_pid += 1;
+        result
+    }
+}
+
+mod tests {
+    #[allow(unused_imports)]
+    use scheduler::Scheduler;
+
+    #[test]
+    fn test_make_scheduler() {
+        let s = Scheduler::new();
+        assert_eq!(s.next_pid, 0);
     }
 }

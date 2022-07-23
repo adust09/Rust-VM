@@ -1,9 +1,10 @@
 use nom::types::CompleteStr;
 
+use assembler::comment_parsers::comment;
+use assembler::label_parsers::label_declaration;
 use assembler::opcode_parsers::*;
 use assembler::operand_parsers::operand;
-use assembler::label_parsers::label_declaration;
-use assembler::{Token, SymbolTable};
+use assembler::{SymbolTable, Token};
 #[derive(Debug, PartialEq)]
 pub struct AssemblerInstruction {
     pub opcode: Option<Token>,
@@ -57,52 +58,36 @@ impl AssemblerInstruction {
 
     /// Checks if the AssemblyInstruction has any operands at all
     pub fn has_operands(&self) -> bool {
-        self.operand1.is_some() ||
-        self.operand2.is_some() ||
-        self.operand3.is_some()
+        self.operand1.is_some() || self.operand2.is_some() || self.operand3.is_some()
     }
 
     pub fn get_directive_name(&self) -> Option<String> {
         match &self.directive {
-            Some(d) => {
-                match d {
-                    Token::Directive { name } => {
-                        Some(name.to_string())
-                    }
-                    _ => { None }
-                }
-            }
-            None => { None }
+            Some(d) => match d {
+                Token::Directive { name } => Some(name.to_string()),
+                _ => None,
+            },
+            None => None,
         }
     }
 
     pub fn get_string_constant(&self) -> Option<String> {
         match &self.operand1 {
-            Some(d) => {
-                match d {
-                    Token::IrString { name } => {
-                        Some(name.to_string())
-                    }
-                    _ => None
-                }
-            }
-            None => { None }
+            Some(d) => match d {
+                Token::IrString { name } => Some(name.to_string()),
+                _ => None,
+            },
+            None => None,
         }
     }
 
     pub fn get_label_name(&self) -> Option<String> {
         match &self.label {
-            Some(l) => {
-                match l {
-                    Token::LabelDeclaration{name} => {
-                        Some(name.clone())
-                    }
-                    _ => None
-                }
+            Some(l) => match l {
+                Token::LabelDeclaration { name } => Some(name.clone()),
+                _ => None,
             },
-            None => {
-                None
-            }
+            None => None,
         }
     }
 
@@ -135,11 +120,14 @@ impl AssemblerInstruction {
 
 named!(instruction_combined<CompleteStr, AssemblerInstruction>,
     do_parse!(
+        opt!(comment) >>
         l: opt!(label_declaration) >>
         o: opcode >>
+        opt!(comment) >>
         o1: opt!(operand) >>
         o2: opt!(operand) >>
         o3: opt!(operand) >>
+        opt!(comment) >>
         (
             AssemblerInstruction{
                 opcode: Some(o),
@@ -152,7 +140,6 @@ named!(instruction_combined<CompleteStr, AssemblerInstruction>,
         )
     )
 );
-
 
 /// Will try to parse out any of the Instruction forms
 named!(pub instruction<CompleteStr, AssemblerInstruction>,
@@ -202,7 +189,9 @@ mod tests {
                     label: None,
                     directive: None,
                     operand1: Some(Token::Register { reg_num: 0 }),
-                    operand2: Some(Token::LabelUsage { name: "test1".to_string() }),
+                    operand2: Some(Token::LabelUsage {
+                        name: "test1".to_string()
+                    }),
                     operand3: None
                 }
             ))
@@ -231,6 +220,44 @@ mod tests {
     #[test]
     fn test_parse_instruction_form_three() {
         let result = instruction_combined(CompleteStr("add $0 $1 $2\n"));
+        assert_eq!(
+            result,
+            Ok((
+                CompleteStr(""),
+                AssemblerInstruction {
+                    opcode: Some(Token::Op { code: Opcode::ADD }),
+                    label: None,
+                    directive: None,
+                    operand1: Some(Token::Register { reg_num: 0 }),
+                    operand2: Some(Token::Register { reg_num: 1 }),
+                    operand3: Some(Token::Register { reg_num: 2 }),
+                }
+            ))
+        );
+    }
+
+    #[test]
+    fn test_parse_instruction_with_comment_one() {
+        let result = instruction_combined(CompleteStr("; this is a test\nadd $0 $1 $2\n"));
+        assert_eq!(
+            result,
+            Ok((
+                CompleteStr(""),
+                AssemblerInstruction {
+                    opcode: Some(Token::Op { code: Opcode::ADD }),
+                    label: None,
+                    directive: None,
+                    operand1: Some(Token::Register { reg_num: 0 }),
+                    operand2: Some(Token::Register { reg_num: 1 }),
+                    operand3: Some(Token::Register { reg_num: 2 }),
+                }
+            ))
+        );
+    }
+
+    #[test]
+    fn test_parse_instruction_with_comment_two() {
+        let result = instruction_combined(CompleteStr("add $0 $1 $2 ; this is a test\n"));
         assert_eq!(
             result,
             Ok((
