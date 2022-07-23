@@ -1,11 +1,8 @@
-use nom::{digit};
-
-use nom::types::CompleteStr;
-
-use assembler::Token;
 use assembler::label_parsers::label_usage;
 use assembler::register_parsers::register;
-
+use assembler::Token;
+use nom::digit;
+use nom::types::CompleteStr;
 
 /// Parser for all numbers, which have to be prefaced with `#` in our assembly language:
 /// #100
@@ -13,10 +10,25 @@ named!(integer_operand<CompleteStr, Token>,
     ws!(
         do_parse!(
             tag!("#") >>
-            sign: opt!(tag!("-")) >>
             reg_num: digit >>
             (
                 Token::IntegerOperand{value: reg_num.parse::<i32>().unwrap()}
+            )
+        )
+    )
+);
+
+named!(float_operand<CompleteStr, Token>,
+    ws!(
+        do_parse!(
+            tag!("#") >>
+            reg_num: digit >>
+            tag!(".") >>
+            post_num: digit >>
+            (
+                {
+                    Token::FloatOperand{value: (reg_num.to_string() + "." + &post_num).parse::<f64>().unwrap()}
+                }
             )
         )
     )
@@ -36,6 +48,7 @@ named!(irstring<CompleteStr, Token>,
 named!(pub operand<CompleteStr, Token>,
     alt!(
         integer_operand |
+        float_operand |
         label_usage |
         register |
         irstring
@@ -44,7 +57,8 @@ named!(pub operand<CompleteStr, Token>,
 
 mod tests {
     #![allow(unused_imports)]
-    use super::{integer_operand, irstring};
+
+    use super::{float_operand, integer_operand, irstring};
     use assembler::Token;
     use nom::types::CompleteStr;
 
@@ -55,7 +69,6 @@ mod tests {
         let (rest, value) = result.unwrap();
         assert_eq!(rest, CompleteStr(""));
         assert_eq!(value, Token::IntegerOperand { value: 10 });
-
         let result = integer_operand(CompleteStr("10"));
         assert_eq!(result.is_ok(), false);
     }
@@ -64,5 +77,12 @@ mod tests {
     fn test_parse_string_operand() {
         let result = irstring(CompleteStr("'This is a test'"));
         assert_eq!(result.is_ok(), true);
+    }
+
+    #[test]
+    fn test_parse_float_operand() {
+        vec!["#100.3", "#-100.3", "#1.0", "0.0"].iter().map(|i| {
+            assert_eq!(float_operand(CompleteStr(i)).is_ok(), true);
+        });
     }
 }

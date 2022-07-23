@@ -1,7 +1,6 @@
+use assembler::Token;
 use nom::types::CompleteStr;
 use nom::{alphanumeric, multispace};
-
-use assembler::Token;
 
 /// Looks for a user-defined label, such as `label1:`
 named!(pub label_declaration<CompleteStr, Token>,
@@ -40,7 +39,12 @@ mod tests {
         let result = label_declaration(CompleteStr("test:"));
         assert_eq!(result.is_ok(), true);
         let (_, token) = result.unwrap();
-        assert_eq!(token, Token::LabelDeclaration { name: "test".to_string() });
+        assert_eq!(
+            token,
+            Token::LabelDeclaration {
+                name: "test".to_string()
+            }
+        );
         let result = label_declaration(CompleteStr("test"));
         assert_eq!(result.is_ok(), false);
     }
@@ -50,9 +54,13 @@ mod tests {
         let result = label_usage(CompleteStr("@test"));
         assert_eq!(result.is_ok(), true);
         let (_, token) = result.unwrap();
-        assert_eq!(token, Token::LabelUsage { name: "test".to_string() });
+        assert_eq!(
+            token,
+            Token::LabelUsage {
+                name: "test".to_string()
+            }
+        );
         let result = label_usage(CompleteStr("test"));
         assert_eq!(result.is_ok(), false);
     }
-
 }
