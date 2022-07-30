@@ -7,14 +7,16 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 
 pub struct ClusterClient {
-    reader: BufReader<TcpStream>,
-    writer: BufWriter<TcpStream>,
+    alias: Option<String>,
+    pub reader: BufReader<TcpStream>,
+    pub writer: BufWriter<TcpStream>,
     rx: Option<Arc<Mutex<Receiver<String>>>>,
-    tx: Option<Arc<Mutex<Sender<String>>>>,
-    raw_stream: TcpStream,
+    _tx: Option<Arc<Mutex<Sender<String>>>>,
+    pub raw_stream: TcpStream,
 }
 
 impl ClusterClient {
+    /// Creates and returns a new ClusterClient that wraps TcpStreams for communicating with it
     pub fn new(stream: TcpStream) -> ClusterClient {
         // TODO: Handle this better
         let reader = stream.try_clone().unwrap();
@@ -24,11 +26,29 @@ impl ClusterClient {
             reader: BufReader::new(reader),
             writer: BufWriter::new(writer),
             raw_stream: stream,
-            tx: Some(Arc::new(Mutex::new(tx))),
+            _tx: Some(Arc::new(Mutex::new(tx))),
             rx: Some(Arc::new(Mutex::new(rx))),
+            alias: None,
         }
     }
 
+    /// Sets the alias of the ClusterClient and returns it
+    pub fn with_alias(mut self, alias: String) -> Self {
+        self.alias = Some(alias);
+        self
+    }
+
+    pub fn send_hello(&mut self) {
+        let alias = self.alias.clone();
+        let alias = alias.unwrap();
+        if self.raw_stream.write(&alias.as_bytes()).is_ok() {
+            trace!("Hello sent!");
+        } else {
+            error!("Error sending hello");
+        }
+    }
+
+    #[allow(dead_code)]
     fn w(&mut self, msg: &str) -> bool {
         match self.writer.write_all(msg.as_bytes()) {
             Ok(_) => match self.writer.flush() {

@@ -1,20 +1,19 @@
+use std;
 use std::io::Cursor;
 use std::net::SocketAddr;
-use std::sync::RwLock;
+use std::sync::{Arc, RwLock};
 use std::thread;
-use std::{self, sync::Arc};
 
 use byteorder::*;
 use chrono::prelude::*;
 use num_cpus;
 use uuid::Uuid;
 
-use assembler::{Assembler, PIE_HEADER_LENGTH, PIE_HEADER_PREFIX};
+use assembler::{PIE_HEADER_LENGTH, PIE_HEADER_PREFIX};
 use cluster;
+use cluster::manager::Manager;
 use instruction::Opcode;
 use std::f64::EPSILON;
-
-use crate::cluster::manager::Manager;
 
 #[derive(Clone, Debug)]
 pub enum VMEventType {
@@ -26,9 +25,9 @@ pub enum VMEventType {
 impl VMEventType {
     pub fn stop_code(&self) -> u32 {
         match &self {
-            &VMEventType::Start => 0,
-            &VMEventType::GracefulStop { code } => *code,
-            &VMEventType::Crash { code } => *code,
+            VMEventType::Start => 0,
+            VMEventType::GracefulStop { code } => *code,
+            VMEventType::Crash { code } => *code,
         }
     }
 }
@@ -45,7 +44,6 @@ pub const DEFAULT_HEAP_STARTING_SIZE: usize = 64;
 #[derive(Default, Clone)]
 pub struct VM {
     /// Array that simulates having hardware registers
-    ///
     pub registers: [i32; 32],
     /// Array that simulates having floating point hardware registers
     pub float_registers: [f64; 32],
@@ -53,6 +51,10 @@ pub struct VM {
     pub program: Vec<u8>,
     /// Number of logical cores the system reports
     pub logical_cores: usize,
+    /// An alias that can be specified by the user and used to refer to the Node
+    pub alias: Option<String>,
+    /// Data structure to manage remote clients
+    pub connection_manager: Arc<RwLock<Manager>>,
     /// Program counter that tracks which byte is being executed
     pc: usize,
     /// Used for heap memory
@@ -68,11 +70,7 @@ pub struct VM {
     /// Contains the read-only section data
     ro_data: Vec<u8>,
     /// Is a unique, randomly generated UUID for identifying this VM
-    id: Uuid,
-    /// An alias that can be specified by the user and used to refer to the Node
-    alias: Option<String>,
-    /// Data structure to manage remote clients
-    pub connection_manager: Arc<RwLock<Manager>>,
+    pub id: Uuid,
     /// Keeps a list of events for a particular VM
     events: Vec<VMEvent>,
     // Server address that the VM will bind to for server-to-server communications
@@ -91,6 +89,7 @@ impl VM {
             ro_data: vec![],
             heap: vec![0; DEFAULT_HEAP_STARTING_SIZE],
             stack: vec![],
+            connection_manager: Arc::new(RwLock::new(Manager::new())),
             pc: 0,
             loop_counter: 0,
             remainder: 0,
@@ -101,7 +100,6 @@ impl VM {
             logical_cores: num_cpus::get(),
             server_addr: None,
             server_port: None,
-            connection_manager: Arc::new(RwLock::new(Manager::new())),
         }
     }
 
@@ -422,8 +420,8 @@ impl VM {
             Opcode::LUI => {
                 let register = self.next_8_bits() as usize;
                 let value = self.registers[register];
-                let uv1 = self.next_8_bits() as i32;
-                let uv2 = self.next_8_bits() as i32;
+                let uv1 = i32::from(self.next_8_bits());
+                let uv2 = i32::from(self.next_8_bits());
                 let value = value.checked_shl(8).unwrap();
                 let value = value | uv1;
                 let value = value.checked_shl(8).unwrap();
@@ -455,27 +453,29 @@ impl VM {
                 self.registers[self.next_8_bits() as usize] = data;
             }
             Opcode::SETM => {
-                let offset = self.registers[self.next_8_bits() as usize] as usize;
+                let _offset = self.registers[self.next_8_bits() as usize] as usize;
                 let data = self.registers[self.next_8_bits() as usize];
                 let mut buf: [u8; 4] = [0, 0, 0, 0];
-                buf.as_mut().write_i32::<LittleEndian>(data);
+                let _ = buf.as_mut().write_i32::<LittleEndian>(data);
             }
             Opcode::PUSH => {
                 let data = self.registers[self.next_8_bits() as usize];
                 let mut buf: [u8; 4] = [0, 0, 0, 0];
-                buf.as_mut().write_i32::<LittleEndian>(data);
-                for b in &buf {
-                    self.stack.push(*b);
+                if buf.as_mut().write_i32::<LittleEndian>(data).is_ok() {
+                    for b in &buf {
+                        self.stack.push(*b);
+                    }
+                } else {
+                    return Some(1);
                 }
             }
             Opcode::POP => {
                 let target_register = self.next_8_bits() as usize;
                 let mut buf: [u8; 4] = [0, 0, 0, 0];
                 let new_len = self.stack.len() - 4;
-                let mut c = 0;
-                for removed_element in self.stack.drain(new_len..) {
+                //for removed_element in self.stack.drain(new_len..) {
+                for (c, removed_element) in self.stack.drain(new_len..).enumerate() {
                     buf[c] = removed_element;
-                    c += 1;
                 }
                 let data = LittleEndian::read_i32(&buf);
                 self.registers[target_register] = data;
@@ -490,10 +490,8 @@ impl VM {
             Opcode::RET => {
                 let mut buf: [u8; 4] = [0, 0, 0, 0];
                 let new_len = self.stack.len() - 4;
-                let mut c = 0;
-                for removed_element in self.stack.drain(new_len..) {
+                for (c, removed_element) in self.stack.drain(new_len..).enumerate() {
                     buf[c] = removed_element;
-                    c += 1;
                 }
                 let data = LittleEndian::read_i32(&buf);
                 self.pc = data as usize;
@@ -535,10 +533,8 @@ impl VM {
         if let Some(ref addr) = self.server_addr {
             if let Some(ref port) = self.server_port {
                 let socket_addr: SocketAddr = (addr.to_string() + ":" + port).parse().unwrap();
-                // Note that we have to make a clone here before we move it into the thread
                 let clone = self.connection_manager.clone();
                 thread::spawn(move || {
-                    // Otherwise, we'd be trying to move the whole thing out of the VM, not an Arc
                     cluster::server::listen(socket_addr, clone);
                 });
             } else {
@@ -554,8 +550,7 @@ impl VM {
 
     fn get_starting_offset(&self) -> usize {
         let mut rdr = Cursor::new(&self.program[64..68]);
-        let starting_offset = rdr.read_u32::<LittleEndian>().unwrap() as usize;
-        starting_offset
+        rdr.read_u32::<LittleEndian>().unwrap() as usize
     }
 
     // Attempts to decode the byte the VM's program counter is pointing at into an opcode
