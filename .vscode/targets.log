@@ -1,5 +1,4 @@
 make all --print-data-base --no-builtin-variables --no-builtin-rules --question
-make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # GNU Make 3.81
 # Copyright (C) 2006  Free Software Foundation, Inc.
 # This is free software; see the source for copying conditions.
@@ -8,7 +7,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 
 # This program built for i386-apple-darwin11.3.0
 
-# Make data base, printed on Mon Jul 18 15:46:19 2022
+# Make data base, printed on Sat Jul 30 13:00:25 2022
 
 # Variables
 
@@ -51,13 +50,15 @@ LESS_TERMCAP_mb = [01;31m
 # environment
 LSCOLORS = exfxcxdxbxGxDxabagacad
 # environment
+LaunchInstanceID = 9FA5C544-5926-4AD5-A94E-6CB03D225E7C
+# environment
 ELECTRON_RUN_AS_NODE = 1
 # environment
 PYENV_ROOT = /Users/ts21/.pyenv
 # default
 .FEATURES := target-specific order-only second-expansion else-if archives jobserver check-symlink
 # environment
-SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.vn99nxeo4O/Listeners
+SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.c6twlYOvgX/Listeners
 # automatic
 %F = $(notdir $%)
 # environment
@@ -79,7 +80,7 @@ HOME = /Users/ts21
 # default
 MAKEFILEPATH = $(shell /usr/bin/xcode-select -print-path 2>/dev/null || echo /Developer)/Makefiles
 # environment
-VSCODE_CODE_CACHE_PATH = /Users/ts21/Library/Application Support/Code/CachedData/b06ae3b2d2dbfe28bca3134cc6be65935cdfea6a
+VSCODE_CODE_CACHE_PATH = /Users/ts21/Library/Application Support/Code/CachedData/3b889b090b5ad5793f524b5d1d39fda662b96a2a
 # environment
 LOGNAME = ts21
 # environment
@@ -123,7 +124,7 @@ TMPDIR = /var/folders/x1/jhqvlmx964z9_x4mqg7g_l040000gn/T/
 # automatic
 *F = $(notdir $*)
 # environment
-VSCODE_IPC_HOOK = /Users/ts21/Library/Application Support/Code/1.69.1-main.sock
+VSCODE_IPC_HOOK = /Users/ts21/Library/Application Support/Code/1.69.2-main.sock
 # environment
 MallocNanoZone = 0
 # makefile
@@ -133,7 +134,7 @@ MFLAGS = -Rrqp
 # automatic
 *D = $(patsubst %/,%,$(dir $*))
 # environment
-XPC_SERVICE_NAME = application.com.microsoft.VSCode.25635981.25635988
+XPC_SERVICE_NAME = application.com.microsoft.VSCode.26185894.26185913
 # environment
 LESS_TERMCAP_us = [01;32m
 # environment
@@ -154,6 +155,8 @@ MAKEFILES :=
 <F = $(notdir $<)
 # environment
 LC_ALL = C
+# environment
+SECURITYSESSIONID = 186ad
 # automatic
 ^F = $(notdir $^)
 # default
@@ -163,9 +166,9 @@ MAKELEVEL := 0
 # environment
 LANG = C
 # environment
-VSCODE_PID = 50683
+VSCODE_PID = 2900
 # variable set hash-table stats:
-# Load=76/1024=7%, Rehash=0, Collisions=2/101=2%
+# Load=78/1024=8%, Rehash=0, Collisions=2/103=2%
 
 # Pattern-specific Variable Values
 
@@ -173,7 +176,7 @@ VSCODE_PID = 50683
 
 # Directories
 
-# . (device 16777230, inode 25284343): 12 files, no impossibilities.
+# . (device 16777234, inode 25284343): 12 files, no impossibilities.
 
 # 12 files, no impossibilities in 1 directories.
 
@@ -221,7 +224,7 @@ all:
 # Not a target:
 Makefile:
 #  Implicit rule search has been done.
-#  Last modified 2022-07-18 14:30:26
+#  Last modified 2022-07-24 08:01:36
 #  File has been updated.
 #  Successfully updated.
 # variable set hash-table stats:
@@ -241,7 +244,7 @@ dev:
 #  File has not been updated.
 #  commands to execute (from `Makefile', line 14):
 	cargo build
-	mv target/debug/iridium /usr/local/bin/
+	sudo mv target/debug/iridium /usr/local/bin/
 	chmod ugo+x /usr/local/bin/
 	
 
@@ -275,6 +278,6 @@ production:
 # strcache size: total = 4096 / max = 4096 / min = 4096 / avg = 4096
 # strcache free: total = 4087 / max = 4087 / min = 4087 / avg = 4087
 
-# Finished Make data base on Mon Jul 18 15:46:19 2022
+# Finished Make data base on Sat Jul 30 13:00:25 2022
 
  
