@@ -3,13 +3,14 @@ use std::io::{BufReader, BufWriter};
 use std::net::TcpStream;
 use std::sync::mpsc::channel;
 use std::sync::mpsc::{Receiver, Sender};
+use std::sync::{Arc, Mutex};
 use std::thread;
 
 pub struct ClusterClient {
     reader: BufReader<TcpStream>,
     writer: BufWriter<TcpStream>,
-    rx: Option<Receiver<String>>,
-    tx: Option<Sender<String>>,
+    rx: Option<Arc<Mutex<Receiver<String>>>>,
+    tx: Option<Arc<Mutex<Sender<String>>>>,
     raw_stream: TcpStream,
 }
 
@@ -23,8 +24,8 @@ impl ClusterClient {
             reader: BufReader::new(reader),
             writer: BufWriter::new(writer),
             raw_stream: stream,
-            tx: Some(tx),
-            rx: Some(rx),
+            tx: Some(Arc::new(Mutex::new(tx))),
+            rx: Some(Arc::new(Mutex::new(rx))),
         }
     }
 
@@ -48,18 +49,20 @@ impl ClusterClient {
         let chan = self.rx.take().unwrap();
         let mut writer = self.raw_stream.try_clone().unwrap();
         let _t = thread::spawn(move || loop {
-            match chan.recv() {
-                Ok(msg) => {
-                    match writer.write_all(msg.as_bytes()) {
-                        Ok(_) => {}
-                        Err(_e) => {}
-                    };
-                    match writer.flush() {
-                        Ok(_) => {}
-                        Err(_e) => {}
+            if let Ok(locked_rx) = chan.lock() {
+                match locked_rx.recv() {
+                    Ok(msg) => {
+                        match writer.write_all(msg.as_bytes()) {
+                            Ok(_) => {}
+                            Err(_e) => {}
+                        };
+                        match writer.flush() {
+                            Ok(_) => {}
+                            Err(_e) => {}
+                        };
                     }
+                    Err(_e) => {}
                 }
-                Err(_e) => {}
             }
         });
     }

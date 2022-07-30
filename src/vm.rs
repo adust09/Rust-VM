@@ -1,7 +1,8 @@
-use std;
 use std::io::Cursor;
 use std::net::SocketAddr;
+use std::sync::RwLock;
 use std::thread;
+use std::{self, sync::Arc};
 
 use byteorder::*;
 use chrono::prelude::*;
@@ -12,6 +13,8 @@ use assembler::{Assembler, PIE_HEADER_LENGTH, PIE_HEADER_PREFIX};
 use cluster;
 use instruction::Opcode;
 use std::f64::EPSILON;
+
+use crate::cluster::manager::Manager;
 
 #[derive(Clone, Debug)]
 pub enum VMEventType {
@@ -42,6 +45,7 @@ pub const DEFAULT_HEAP_STARTING_SIZE: usize = 64;
 #[derive(Default, Clone)]
 pub struct VM {
     /// Array that simulates having hardware registers
+    ///
     pub registers: [i32; 32],
     /// Array that simulates having floating point hardware registers
     pub float_registers: [f64; 32],
@@ -67,6 +71,8 @@ pub struct VM {
     id: Uuid,
     /// An alias that can be specified by the user and used to refer to the Node
     alias: Option<String>,
+    /// Data structure to manage remote clients
+    pub connection_manager: Arc<RwLock<Manager>>,
     /// Keeps a list of events for a particular VM
     events: Vec<VMEvent>,
     // Server address that the VM will bind to for server-to-server communications
@@ -95,6 +101,7 @@ impl VM {
             logical_cores: num_cpus::get(),
             server_addr: None,
             server_port: None,
+            connection_manager: Arc::new(RwLock::new(Manager::new())),
         }
     }
 
@@ -527,11 +534,12 @@ impl VM {
     pub fn bind_cluster_server(&mut self) {
         if let Some(ref addr) = self.server_addr {
             if let Some(ref port) = self.server_port {
-                debug!("Binding to: {} {}", addr, port);
                 let socket_addr: SocketAddr = (addr.to_string() + ":" + port).parse().unwrap();
-                debug!("SocketAddr is: {:?}", socket_addr);
+                // Note that we have to make a clone here before we move it into the thread
+                let clone = self.connection_manager.clone();
                 thread::spawn(move || {
-                    cluster::server::listen(socket_addr);
+                    // Otherwise, we'd be trying to move the whole thing out of the VM, not an Arc
+                    cluster::server::listen(socket_addr, clone);
                 });
             } else {
                 error!("Unable to bind to cluster server address: {}", addr);

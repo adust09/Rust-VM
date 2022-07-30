@@ -200,11 +200,16 @@ impl REPL {
             "!load_file" => self.load_file(&args[1..]),
             "!spawn" => self.spawn(&args[1..]),
             "!start_cluster" => self.start_cluster(&args[1..]),
+            "!join_cluster" => self.join_cluster(&args[1..]),
             _ => {
                 self.send_message("Invalid command!".to_string());
                 self.send_prompt();
             }
         };
+    }
+
+    fn join_cluster(&mut self, _args: &[&str]) {
+        debug!("Attempting to join cluster...");
     }
 
     fn quit(&mut self, _args: &[&str]) {
