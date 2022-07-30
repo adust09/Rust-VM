@@ -76,7 +76,7 @@ fn main() {
             match program {
                 Ok(p) => {
                     vm.add_bytes(p);
-                    let events = vm.run();
+                    let _events = vm.run();
                     println!("{:#?}", vm.registers);
                     std::process::exit(0);
                 }
