@@ -4,8 +4,12 @@ extern crate chrono;
 extern crate log;
 #[macro_use]
 extern crate nom;
+extern crate bincode;
 extern crate num_cpus;
 extern crate uuid;
+#[macro_use]
+extern crate serde_derive;
+extern crate serde;
 
 pub mod assembler;
 pub mod cluster;
