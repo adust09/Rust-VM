@@ -3,7 +3,7 @@ pub mod command_parser;
 use std;
 use std::fs::File;
 use std::io;
-use std::io::{Read, Write};
+use std::io::Read;
 use std::net::TcpStream;
 use std::num::ParseIntError;
 use std::path::Path;
@@ -51,7 +51,9 @@ impl REPL {
     /// Run loop similar to the VM execution loop, but the instructions are taken from the user directly
     /// at the terminal and not from pre-compiled bytecode
     pub fn run(&mut self) {
+        debug!("Starting REPL run loop with VM ID of {:?}", self.vm.alias);
         self.send_message(REMOTE_BANNER.to_string());
+        self.send_prompt();
         loop {
             // This allocates a new String in which to store whatever the user types each iteration.
             // TODO: Figure out how allocate this outside of the loop and re-use it every iteration
@@ -59,11 +61,6 @@ impl REPL {
 
             // Blocking call until the user types in a command
             let stdin = io::stdin();
-
-            // Annoyingly, `print!` does not automatically flush stdout like `self.send_message` does, so we
-            // have to do that there for the user to see our `>>> ` prompt.
-            print!(">>> ");
-            io::stdout().flush().expect("Unable to flush stdout");
 
             // Here we'll look at the string the user gave us.
             stdin
@@ -78,9 +75,11 @@ impl REPL {
             } else {
                 let program = match program(CompleteStr(&buffer)) {
                     Ok((_remainder, program)) => program,
-                    Err(_e) => {
-                        self.send_message(REMOTE_BANNER.to_string());
-                        self.send_prompt();
+                    Err(e) => {
+                        self.send_message(format!(
+                            "There was an error executing the program: {:?}",
+                            e
+                        ));
                         continue;
                     }
                 };
@@ -101,7 +100,6 @@ impl REPL {
                 Ok((_remainder, program)) => Some(program),
                 Err(e) => {
                     self.send_message(format!("Unable to parse input: {:?}", e));
-                    self.send_prompt();
                     None
                 }
             };
@@ -204,7 +202,6 @@ impl REPL {
             "!cluster_members" => self.cluster_members(&args[1..]),
             _ => {
                 self.send_message("Invalid command!".to_string());
-                self.send_prompt();
             }
         };
     }
@@ -220,7 +217,6 @@ impl REPL {
             results.push(command.clone());
         }
         self.send_message(format!("{:#?}", results));
-        self.send_prompt();
     }
 
     fn program(&mut self, _args: &[&str]) {
@@ -231,7 +227,6 @@ impl REPL {
         }
         self.send_message(format!("{:#?}", results));
         self.send_message("End of Program Listing".to_string());
-        self.send_prompt();
     }
 
     fn clear_program(&mut self, _args: &[&str]) {
@@ -244,7 +239,6 @@ impl REPL {
             self.vm.registers[i] = 0;
         }
         self.send_message("Done!".to_string());
-        self.send_prompt();
     }
 
     fn registers(&mut self, _args: &[&str]) {
@@ -255,7 +249,6 @@ impl REPL {
         }
         self.send_message(format!("{:#?}", results));
         self.send_message("End of Register Listing".to_string());
-        self.send_prompt();
     }
 
     fn symbols(&mut self, _args: &[&str]) {
@@ -266,7 +259,6 @@ impl REPL {
         self.send_message("Listing symbols table:".to_string());
         self.send_message(format!("{:#?}", results));
         self.send_message("End of Symbols Listing".to_string());
-        self.send_prompt();
     }
 
     fn load_file(&mut self, _args: &[&str]) {
@@ -281,7 +273,6 @@ impl REPL {
                 Err(errors) => {
                     for error in errors {
                         self.send_message(format!("Unable to parse input: {}", error));
-                        self.send_prompt();
                     }
                     return;
                 }
@@ -304,7 +295,6 @@ impl REPL {
                 Err(errors) => {
                     for error in errors {
                         self.send_message(format!("Unable to parse input: {}", error));
-                        self.send_prompt();
                     }
                     return;
                 }
@@ -320,18 +310,29 @@ impl REPL {
     }
 
     fn join_cluster(&mut self, args: &[&str]) {
+        debug!("Joining cluster with VM ID: {:?}", self.vm.alias);
         self.send_message("Attempting to join cluster...".to_string());
         let ip = args[0];
         let port = args[1];
-        let addr = ip.to_owned() + ":" + port;
+        let addr = ip.to_owned() + ":" + port.clone();
         if let Ok(stream) = TcpStream::connect(addr) {
             self.send_message("Connected to cluster!".to_string());
-            let mut cc =
-                cluster::client::ClusterClient::new(stream).with_alias(self.vm.id.to_string());
+            let mut cc = cluster::client::ClusterClient::new(
+                stream,
+                self.vm.connection_manager.clone(),
+                self.vm.server_port.clone().unwrap(),
+            )
+            .with_alias(self.vm.alias.clone().unwrap());
+            debug!("CC Hello is: {:#?}", cc);
             cc.send_hello();
             if let Some(ref a) = self.vm.alias {
                 if let Ok(mut lock) = self.vm.connection_manager.write() {
-                    lock.add_client(a.to_string(), cc);
+                    let client_tuple = (
+                        a.to_string(),
+                        cc.ip_as_string().unwrap(),
+                        cc.port_as_string().unwrap(),
+                    );
+                    lock.add_client(client_tuple, cc);
                 }
             }
         } else {
