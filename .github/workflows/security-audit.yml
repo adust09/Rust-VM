@@ -1,10 +1,8 @@
 name: security-audit
 
 on:
-  push:
-    branches: ["main"]
   schedule:
-    - cron: "0,5,10,15,20 21 * * *"
+    - cron: "35,40 21 * * *"
 
 jobs:
   security_audit:
