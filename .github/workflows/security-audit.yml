@@ -4,7 +4,7 @@ on:
   push:
     branches: ["main"]
   schedule:
-    - cron: "20 * * * *"
+    - cron: '25 * * * *'
 
 jobs:
   security_audit:
@@ -30,7 +30,7 @@ jobs:
 
       - name: Discord Message Notify
         if: ${{ steps.check_vulnerabilities.outcome == 'success' && steps.check_vulnerabilities.exitcode == 0 }}
-        uses: appleboy/discord-action@0.3.2
+        uses: appleboy/discord-action@0.0.3
         with:
           webhook_id: ${{ secrets.WEBHOOK_ID }}
           webhook_token: ${{ secrets.WEBHOOK_TOKEN }}
