@@ -1,0 +1,30 @@
+name: security-audit
+
+on:
+  schedule:
+    - cron: "0 * * * *"
+
+jobs:
+  security_audit:
+    runs-on: Security Audit
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly-2022-09-08
+          override: true
+
+      - name: Install Cargo Audit
+        run: cargo install cargo-audit
+
+      - name: Check for vulnerabilities
+        run: cargo audit
+
+      - name: Notify if vulnerabilities found
+        if: ${{ steps.check_vulnerabilities.outcome == 'success' && steps.check_vulnerabilities.exitcode == 0 }}
+        run: echo "Vulnerabilities found in dependencies"
