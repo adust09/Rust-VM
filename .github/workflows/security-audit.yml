@@ -2,7 +2,7 @@ name: security-audit
 
 on:
   schedule:
-    - cron: "35,40 21 * * *"
+    - cron: "5 * * * *"
 
 jobs:
   security_audit:
@@ -26,6 +26,12 @@ jobs:
       - name: Check for vulnerabilities
         run: cargo audit
 
-      - name: Notify if vulnerabilities found
+      - name: Discord Message Notify
         if: ${{ steps.check_vulnerabilities.outcome == 'success' && steps.check_vulnerabilities.exitcode == 0 }}
-        run: echo "Vulnerabilities found in dependencies"
+        uses: appleboy/discord-action@0.3.2
+        with:
+          webhook_id: ${{ secrets.WEBHOOK_ID }}
+          webhook_token: ${{ secrets.WEBHOOK_TOKEN }}
+          color: "#48f442"
+          username: "GitHub Bot"
+          args: The ${{ github.event_name }} event triggered.
