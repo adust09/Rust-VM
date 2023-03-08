@@ -8,7 +8,8 @@ on:
 
 jobs:
   security_audit:
-    runs-on: Security Audit
+    name: Security Audit
+    runs-on: ubuntu-16.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
