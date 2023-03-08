@@ -16,4 +16,20 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Run tests
+        id: test
         run: cargo test --verbose
+        continue-on-error: true
+
+      - name: Discord Message Notify
+        if: ${{ steps.test.exitcode != 'success'}}
+        uses: appleboy/discord-action@0.0.3
+        with:
+          webhook_id: ${{ secrets.WEBHOOK_ID }}
+          webhook_token: ${{ secrets.WEBHOOK_TOKEN }}
+          color: "#48f442"
+          username: "GitHub Actions"
+          args: ${{ steps.test.exitcode}} event failed.
+
+      - name: Fail
+        if: ${{ steps.test.exitcode != 'success'}}
+        run: exit 1

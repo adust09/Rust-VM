@@ -4,7 +4,7 @@ on:
   push:
     branches: ["main"]
   schedule:
-    - cron: '25 * * * *'
+    - cron: '0 * * * *'
 
 jobs:
   security_audit:
@@ -37,8 +37,9 @@ jobs:
           webhook_id: ${{ secrets.WEBHOOK_ID }}
           webhook_token: ${{ secrets.WEBHOOK_TOKEN }}
           color: "#48f442"
-          username: "GitHub Bot"
-          args: The ${{ github.event_name }} event triggered.
+          username: "GitHub Actions"
+          args: ${{ steps.check_vulnerabilities.exitcode}} event failed.
 
-      - name: fail
+      - name: Fail
+        if: ${{ steps.check_vulnerabilities.exitcode != 'success'}}
         run: exit 1
