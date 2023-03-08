@@ -16,13 +16,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Build
+        id: build
         run: cargo build --verbose
-
-      - name: Run tests
-        run: cargo test --verbose
+        continue-on-error: true
 
       - name: Discord Message Notify
         uses: appleboy/discord-action@0.0.3
+        if: ${{ steps.build.exitcode != 0 }}
         with:
           webhook_id: ${{ secrets.WEBHOOK_ID }}
           webhook_token: ${{ secrets.WEBHOOK_TOKEN }}

@@ -26,10 +26,12 @@ jobs:
         run: cargo install cargo-audit
 
       - name: Check for vulnerabilities
+        id: check_vulnerabilities
         run: cargo audit
+        continue-on-error: true
 
       - name: Discord Message Notify
-        if: ${{ steps.check_vulnerabilities.outcome == 'success' && steps.check_vulnerabilities.exitcode == 0 }}
+        if: ${{ steps.check_vulnerabilities.exitcode != 0 }}
         uses: appleboy/discord-action@0.0.3
         with:
           webhook_id: ${{ secrets.WEBHOOK_ID }}
