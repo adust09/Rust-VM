@@ -28,7 +28,6 @@ jobs:
       - name: Check for vulnerabilities
         id: check_vulnerabilities
         run: cargo audit
-        continue-on-error: true
 
       - name: Discord Message Notify
         if: ${{ steps.check_vulnerabilities.exitcode != 0 }}
