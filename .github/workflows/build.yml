@@ -22,7 +22,7 @@ jobs:
 
       - name: Build Failure
         uses: rjstone/discord-webhook-notify@v1
-        if: failure()
+        if: failure() && steps.build.outcome == 'failure'
         with:
             severity: error
             details: Build Failed!
