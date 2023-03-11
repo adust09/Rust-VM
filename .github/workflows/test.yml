@@ -30,6 +30,6 @@ jobs:
           title: "Test"
           avatarUrl: https://github.githubassets.com/images/modules/logos_page/Octocat.png
 
-      - name: Fail
+      - name: Final statusqa
         if: ${{ steps.test.outcome == 'failure' }}
         run: exit 1

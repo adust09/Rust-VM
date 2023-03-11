@@ -37,9 +37,9 @@ jobs:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
           status: ${{ steps.check_vulnerabilities.outcome }}
           title: "Audit"
-          content: "PIC:<@shouki>"
+          content: "PIC:<@everyone>"
           avatarUrl: https://github.githubassets.com/images/modules/logos_page/Octocat.png
 
-      - name: Fail
+      - name: Final status
         if: ${{ steps.check_vulnerabilities.outcome == 'failure' }}
         run: exit 1

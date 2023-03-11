@@ -29,6 +29,6 @@ jobs:
           description: "Build failed."
           avatarUrl: https://github.githubassets.com/images/modules/logos_page/Octocat.png
 
-      - name: Fail
+      - name: Final status
         if: ${{ steps.build.outcome == 'failure' }}
         run: exit 1
