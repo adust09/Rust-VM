@@ -19,20 +19,6 @@ jobs:
         id: test
         run: cargo test --verbose
         continue-on-error: true
-
-      - name: Discord Message Notify
-        if: ${{ steps.test.exitcode != 'success'}}
-        uses: appleboy/discord-action@0.0.3
-        with:
-          webhook_id: ${{ secrets.WEBHOOK_ID }}
-          webhook_token: ${{ secrets.WEBHOOK_TOKEN }}
-          color: "#48f442"
-          username: "GitHub Actions"
-          args: ${{ steps.test.exitcode}} test failed.
-
-      - name: Fail
-        if: failure()
-        run: exit 1
       
       - name: Test Success
         uses: rjstone/discord-webhook-notify@v1
