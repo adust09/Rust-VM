@@ -19,7 +19,10 @@ jobs:
         id: test
         run: cargo test --verbose
         continue-on-error: true
-            
-      - uses: sarisia/actions-status-discord@v1
+
+      - name: Test Failure    
+        if: ${{ steps.test.outcome == 'failure' }}
+        uses: sarisia/actions-status-discord@v1
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          username: GitHub Actions

@@ -31,11 +31,11 @@ jobs:
         continue-on-error: true
 
       - name: Audit Failure
-        uses: rjstone/discord-webhook-notify@v1
+        if: ${{ steps.check_vulnerabilities.outcome == 'failure' }}
+        uses: sarisia/actions-status-discord@v1
         with:
-          severity: info
-          color: '#ff00aa'
-          details: Build Failed!
-          description: ${{ vars.ADMIN_NAME }} please check the build logs.
-          avatarUrl: https://github.githubassets.com/images/modules/logos_page/Octocat.png
-          webhookUrl: ${{ secrets.DISCORD_URL }}
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          status: ${{ job.status }}
+          title: "Audit"
+          description: "Vulnerability detected."
+          content: "Hey <@shouki#3158>"
