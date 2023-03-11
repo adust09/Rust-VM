@@ -38,3 +38,4 @@ jobs:
           details: Build Failed!
           description: ${{ vars.ADMIN_NAME }} please check the build logs.
           avatarUrl: https://github.githubassets.com/images/modules/logos_page/Octocat.png
+          webhookUrl: ${{ secrets.DISCORD_URL }}
