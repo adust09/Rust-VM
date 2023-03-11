@@ -22,7 +22,7 @@ jobs:
             
       - name: Test Failure
         uses: rjstone/discord-webhook-notify@v1
-        if: failure() && steps.test.outcome == 'failure'
+        if: steps.test.outcome == 'failure'
         with:
             severity: error
             details: Test Failed!
