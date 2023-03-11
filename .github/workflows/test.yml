@@ -18,18 +18,8 @@ jobs:
       - name: Run tests
         id: test
         run: cargo test --verbose
-        continue-on-error: true
-
-      - name: Test Failure    
-        if: ${{ steps.test.outcome == 'failure' }}
+      - if: failure()
         uses: sarisia/actions-status-discord@v1
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
-          username: GitHub Actions
-          status: ${{ steps.build.outcome }}
-          title: "Test"
           avatarUrl: https://github.githubassets.com/images/modules/logos_page/Octocat.png
-
-      - name: Final statusqa
-        if: ${{ steps.test.outcome == 'failure' }}
-        run: exit 1
