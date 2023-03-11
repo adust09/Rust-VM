@@ -1,4 +1,4 @@
-name: audit
+name: Rust Dependency Check
 
 on:
   push:
@@ -10,7 +10,6 @@ on:
 
 jobs:
   audit:
-    name: Security Audit
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -27,8 +26,7 @@ jobs:
       - name: Install Cargo Audit
         run: cargo install cargo-audit
 
-      - name: Check for vulnerabilities
-        id: check_vulnerabilities
+      - name: Run cargo audit
         run: cargo audit
       - if: failure()
         uses: sarisia/actions-status-discord@v1

@@ -1,4 +1,4 @@
-name: test
+name: Test
 
 on:
   push:
@@ -12,11 +12,9 @@ env:
 jobs:
   test:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
       - name: Run tests
-        id: test
         run: cargo test --verbose
       - if: failure()
         uses: sarisia/actions-status-discord@v1
