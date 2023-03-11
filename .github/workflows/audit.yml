@@ -39,3 +39,5 @@ jobs:
           title: "Audit"
           description: "Vulnerability detected."
           content: "Hey <@shouki#3158>"
+          
+      - run: exit 1
