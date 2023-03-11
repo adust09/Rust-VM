@@ -28,8 +28,8 @@ jobs:
           webhook_token: ${{ secrets.WEBHOOK_TOKEN }}
           color: "#48f442"
           username: "GitHub Actions"
-          args: ${{ steps.test.exitcode}} event failed.
+          args: ${{ steps.test.exitcode}} test failed.
 
       - name: Fail
-        if: ${{ steps.test.exitcode != 'success'}}
+        if: failure()
         run: exit 1

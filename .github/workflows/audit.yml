@@ -41,5 +41,5 @@ jobs:
           args: ${{ steps.check_vulnerabilities.outputs.url_output }}
 
       - name: Fail
-        if: ${{ steps.check_vulnerabilities.exitcode != 'success'}}
+        if: failure()
         run: exit 1
