@@ -28,7 +28,6 @@ jobs:
       - name: Check for vulnerabilities
         id: check_vulnerabilities
         run: cargo audit
-        continue-on-error: true
       - if: failure()
         uses: sarisia/actions-status-discord@v1
         with:
