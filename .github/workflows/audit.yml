@@ -1,4 +1,4 @@
-name: Rust Dependency Check
+name: audit-dependency
 
 on:
   push:
@@ -12,25 +12,17 @@ jobs:
   audit:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
         with:
           submodules: recursive
-
-      - name: Install Rust
-        uses: actions-rs/toolchain@v1
+      - uses: actions-rs/toolchain@v1
         with:
           toolchain: nightly-2022-09-08
           override: true
-
-      - name: Install Cargo Audit
-        run: cargo install cargo-audit
-
-      - name: Run cargo audit
-        run: cargo audit
+      - run: cargo install cargo-audit
+      - run: cargo audit
       - if: failure()
         uses: sarisia/actions-status-discord@v1
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
           avatar_url: ${{ secrets.AVATAR_URL }}
-
