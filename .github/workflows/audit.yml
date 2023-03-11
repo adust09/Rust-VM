@@ -38,8 +38,7 @@ jobs:
           webhook_token: ${{ secrets.WEBHOOK_TOKEN }}
           color: "#48f442"
           username: "GitHub Actions"
-          args: ${{ steps.check_vulnerabilities.exitcode}} event failed.
-          url: ${{ steps.check_vulnerabilities.outputs.url_output }}
+          args: ${{ steps.check_vulnerabilities.outputs.url_output }}
 
       - name: Fail
         if: ${{ steps.check_vulnerabilities.exitcode != 'success'}}
