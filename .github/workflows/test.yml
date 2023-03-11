@@ -20,10 +20,6 @@ jobs:
         run: cargo test --verbose
         continue-on-error: true
             
-      # - name: Test Failure
-      #   uses: rjstone/discord-webhook-notify@v1
-      #   if: steps.test.outcome == 'failure'
-      #   with:
-      #     severity: error
-      #     details: Test Failed!
-      #     webhookUrl: ${{ secrets.DISCORD_URL }}
+      - uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
