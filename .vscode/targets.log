@@ -7,7 +7,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 
 # This program built for i386-apple-darwin11.3.0
 
-# Make data base, printed on Sat Jul 30 13:00:25 2022
+# Make data base, printed on Sat Mar 11 23:01:14 2023
 
 # Variables
 
@@ -16,7 +16,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # automatic
 ?F = $(notdir $?)
 # environment
-GREP_COLOR = 37;45
+VSCODE_CRASH_REPORTER_PROCESS_TYPE = extensionHost
 # automatic
 ?D = $(patsubst %/,%,$(dir $?))
 # automatic
@@ -24,19 +24,15 @@ GREP_COLOR = 37;45
 # automatic
 @F = $(notdir $@)
 # makefile
-CURDIR := /Users/ts21/iridium
+CURDIR := /Users/ts21/Rust-VM
 # makefile
 SHELL = /bin/sh
 # environment
-PROMPT_EOL_MARK = 
-# environment
-VSCODE_NLS_CONFIG = {"locale":"ja","availableLanguages":{},"_languagePackSupport":true}
+VSCODE_NLS_CONFIG = {"locale":"ja-jp","availableLanguages":{},"_languagePackSupport":true}
 # environment
 _ = /usr/bin/make
 # makefile (from `Makefile', line 1)
 MAKEFILE_LIST :=  Makefile
-# environment
-LESS_TERMCAP_se = [0m
 # environment
 __CFBundleIdentifier = com.microsoft.VSCode
 # environment
@@ -44,53 +40,45 @@ INFOPATH = /opt/homebrew/share/info:
 # environment
 VSCODE_CWD = /
 # environment
-LESS_TERMCAP_me = [0m
+PATH = /Users/ts21/.local/bin:/Users/ts21/.poetry/bin:/Users/ts21/.local/share/solana/install/active_release/bin:/Users/ts21/.nodebrew/current/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/TeX/texbin:/Library/Apple/usr/bin
 # environment
-LESS_TERMCAP_mb = [01;31m
-# environment
-LSCOLORS = exfxcxdxbxGxDxabagacad
-# environment
-LaunchInstanceID = 9FA5C544-5926-4AD5-A94E-6CB03D225E7C
+LSCOLORS = Gxfxcxdxbxegedabagacad
 # environment
 ELECTRON_RUN_AS_NODE = 1
-# environment
-PYENV_ROOT = /Users/ts21/.pyenv
 # default
 .FEATURES := target-specific order-only second-expansion else-if archives jobserver check-symlink
 # environment
-SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.c6twlYOvgX/Listeners
+LS_COLORS = di=34:ln=35:so=32:pi=33:ex=31:bd=34;46:cd=34;43:su=37;41:sg=30;43:tw=30;42:ow=34;42:
+# environment
+SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.FEbMJPRgKd/Listeners
 # automatic
 %F = $(notdir $%)
 # environment
-PWD = /Users/ts21/iridium
+PWD = /Users/ts21/Rust-VM
 # environment
 HOMEBREW_CELLAR = /opt/homebrew/Cellar
 # environment
 ORIGINAL_XDG_CURRENT_DESKTOP = undefined
 # environment
-LESS_TERMCAP_ue = [0m
-# environment
 MANPATH = /opt/homebrew/share/man::
 # environment
 VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
-# environment
-PYENV_SHELL = zsh
 # environment
 HOME = /Users/ts21
 # default
 MAKEFILEPATH = $(shell /usr/bin/xcode-select -print-path 2>/dev/null || echo /Developer)/Makefiles
 # environment
-VSCODE_CODE_CACHE_PATH = /Users/ts21/Library/Application Support/Code/CachedData/3b889b090b5ad5793f524b5d1d39fda662b96a2a
+VSCODE_CODE_CACHE_PATH = /Users/ts21/Library/Application Support/Code/CachedData/92da9481c0904c6adfe372c12da3b7748d74bdcb
 # environment
 LOGNAME = ts21
 # environment
 APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
 # environment
+ZSH = /Users/ts21/.oh-my-zsh
+# environment
 VSCODE_HANDLES_UNCAUGHT_ERRORS = true
 # automatic
 ^D = $(patsubst %/,%,$(dir $^))
-# environment
-LESS_TERMCAP_md = [01;31m
 # environment
 XPC_FLAGS = 0x0
 # default
@@ -98,25 +86,19 @@ MAKE = $(MAKE_COMMAND)
 # default
 MAKECMDGOALS := all
 # environment
-PATH = /Users/ts21/.pyenv/shims:/Users/ts21/.svm/solc/0.8.0:/Users/ts21/.local/share/solana/install/active_release/bin:/Users/ts21/.nodebrew/current/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/TeX/texbin:/Users/ts21/.cargo/bin
-# environment
 SHLVL = 1
-# environment
-LESS_TERMCAP_so = [00;47;30m
-# environment
-JAVA_HOME = /opt/homebrew/Cellar/openjdk/18.0.1.1/libexec/openjdk.jdk/Contents/Home
 # default
 MAKE_VERSION := 3.81
 # environment
 USER = ts21
 # makefile
 .DEFAULT_GOAL := all
+# environment
+LESS = -R
 # automatic
 %D = $(patsubst %/,%,$(dir $%))
 # default
 MAKE_COMMAND := /Library/Developer/CommandLineTools/usr/bin/make
-# environment
-GREP_COLORS = mt=37;45
 # default
 .VARIABLES := 
 # environment
@@ -124,7 +106,7 @@ TMPDIR = /var/folders/x1/jhqvlmx964z9_x4mqg7g_l040000gn/T/
 # automatic
 *F = $(notdir $*)
 # environment
-VSCODE_IPC_HOOK = /Users/ts21/Library/Application Support/Code/1.69.2-main.sock
+VSCODE_IPC_HOOK = /Users/ts21/Library/Application Support/Code/1.76-main.sock
 # environment
 MallocNanoZone = 0
 # makefile
@@ -134,9 +116,7 @@ MFLAGS = -Rrqp
 # automatic
 *D = $(patsubst %/,%,$(dir $*))
 # environment
-XPC_SERVICE_NAME = application.com.microsoft.VSCode.26185894.26185913
-# environment
-LESS_TERMCAP_us = [01;32m
+XPC_SERVICE_NAME = application.com.microsoft.VSCode.50800181.50800187
 # environment
 HOMEBREW_PREFIX = /opt/homebrew
 # automatic
@@ -146,7 +126,7 @@ HOMEBREW_PREFIX = /opt/homebrew
 # environment
 HOMEBREW_REPOSITORY = /opt/homebrew
 # environment
-__CF_USER_TEXT_ENCODING = 0x1F5:0x1:0xE
+__CF_USER_TEXT_ENCODING = 0x1F5:0:0
 # environment
 COMMAND_MODE = unix2003
 # default
@@ -154,9 +134,9 @@ MAKEFILES :=
 # automatic
 <F = $(notdir $<)
 # environment
-LC_ALL = C
+PAGER = less
 # environment
-SECURITYSESSIONID = 186ad
+LC_ALL = C
 # automatic
 ^F = $(notdir $^)
 # default
@@ -166,9 +146,9 @@ MAKELEVEL := 0
 # environment
 LANG = C
 # environment
-VSCODE_PID = 2900
+VSCODE_PID = 5402
 # variable set hash-table stats:
-# Load=78/1024=8%, Rehash=0, Collisions=2/103=2%
+# Load=68/1024=7%, Rehash=0, Collisions=1/93=1%
 
 # Pattern-specific Variable Values
 
@@ -176,9 +156,9 @@ VSCODE_PID = 2900
 
 # Directories
 
-# . (device 16777234, inode 25284343): 12 files, no impossibilities.
+# . (device 16777233, inode 51476305): 14 files, no impossibilities.
 
-# 12 files, no impossibilities in 1 directories.
+# 14 files, no impossibilities in 1 directories.
 
 # Implicit Rules
 
@@ -224,7 +204,7 @@ all:
 # Not a target:
 Makefile:
 #  Implicit rule search has been done.
-#  Last modified 2022-07-24 08:01:36
+#  Last modified 2023-03-08 19:59:46
 #  File has been updated.
 #  Successfully updated.
 # variable set hash-table stats:
@@ -278,6 +258,6 @@ production:
 # strcache size: total = 4096 / max = 4096 / min = 4096 / avg = 4096
 # strcache free: total = 4087 / max = 4087 / min = 4087 / avg = 4087
 
-# Finished Make data base on Sat Jul 30 13:00:25 2022
+# Finished Make data base on Sat Mar 11 23:01:14 2023
 
  

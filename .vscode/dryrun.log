@@ -1,5 +1,5 @@
 make --dry-run --always-make --keep-going --print-directory
-make: Entering directory `/Users/ts21/iridium'
+make: Entering directory `/Users/ts21/Rust-VM'
 test production
-make: Leaving directory `/Users/ts21/iridium'
+make: Leaving directory `/Users/ts21/Rust-VM'
  
