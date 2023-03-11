@@ -36,5 +36,5 @@ jobs:
           severity: info
           color: '#ff00aa'
           details: Build Failed!
-          description: ${{ variables.ADMIN_NAME }} please check the build logs.
+          description: ${{ vars.ADMIN_NAME }} please check the build logs.
           avatarUrl: https://github.githubassets.com/images/modules/logos_page/Octocat.png
