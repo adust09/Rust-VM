@@ -24,3 +24,11 @@ jobs:
         uses: sarisia/actions-status-discord@v1
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          status: ${{ steps.build.outcome }}
+          title: "Build"
+          description: "Build failed."
+          avatarUrl: https://github.githubassets.com/images/modules/logos_page/Octocat.png
+
+      - name: Fail
+        if: ${{ steps.build.outcome == 'failure' }}
+        run: exit 1
