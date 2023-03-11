@@ -30,16 +30,10 @@ jobs:
         run: cargo audit
         continue-on-error: true
 
-      - name: Discord Message Notify
-        if: ${{ steps.check_vulnerabilities.exitcode != 'success'}}
-        uses: appleboy/discord-action@0.0.3
+      - name: Audit Failure
+        uses: rjstone/discord-webhook-notify@v1
+        if: failure()
         with:
-          webhook_id: ${{ secrets.WEBHOOK_ID }}
-          webhook_token: ${{ secrets.WEBHOOK_TOKEN }}
-          color: "#48f442"
-          username: "GitHub Actions"
-          args: ${{ steps.check_vulnerabilities.outputs.url_output }}
-
-      - name: Fail
-        if: ${{ steps.check_vulnerabilities.exitcode != 'success'}}
-        run: exit 1
+            severity: error
+            details: Audit Failed!
+            webhookUrl: ${{ secrets.DISCORD_URL }}
