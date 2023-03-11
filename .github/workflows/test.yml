@@ -27,7 +27,7 @@ jobs:
         with:
           command: clippy
           args: -- -D warnings
-      - uses: cargo test --verbose
+      - run: cargo test --verbose
       - if: failure()
         uses: sarisia/actions-status-discord@v1
         with:
