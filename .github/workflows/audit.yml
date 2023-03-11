@@ -32,8 +32,7 @@ jobs:
 
       - name: Audit Failure
         uses: rjstone/discord-webhook-notify@v1
-        if: steps.check_vulnerabilities.outcome == 'failure'
         with:
-            severity: error
-            details: Audit Failed!
-            webhookUrl: ${{ secrets.DISCORD_URL }}
+          severity: error
+          details: Audit Failed!
+          webhookUrl: ${{ secrets.DISCORD_URL }}

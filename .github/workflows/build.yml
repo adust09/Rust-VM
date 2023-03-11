@@ -12,7 +12,6 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
       - name: Build
@@ -24,6 +23,6 @@ jobs:
         uses: rjstone/discord-webhook-notify@v1
         if: steps.build.outcome == 'failure'
         with:
-            severity: error
-            details: Build Failed!
-            webhookUrl: ${{ secrets.DISCORD_URL }}
+          severity: error
+          details: Build Failed!
+          webhookUrl: ${{ secrets.DISCORD_URL }}
