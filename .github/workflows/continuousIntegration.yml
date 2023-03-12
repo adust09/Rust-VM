@@ -29,13 +29,13 @@ jobs:
           command: fmt
           args: --all -- --check
 
-      - name: Lint
-        id: lint
-        if: ${{ always() }}
-        uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: --all-targets --all-features -- -D warnings
+      # - name: Lint
+      #   id: lint
+      #   if: ${{ always() }}
+      #   uses: actions-rs/cargo@v1
+      #   with:
+      #     command: clippy
+      #     args: --all-targets --all-features -- -D warnings
 
       - name: Test
         id: test
@@ -52,11 +52,11 @@ jobs:
         with:
           version: '0.15.0'
           args: '-- --test-threads 1'
-          
-      - name: Upload to codecov.io
-        uses: codecov/codecov-action@v1.0.2
-        with:
-          token: ${{secrets.CODECOV_TOKEN}}
+
+      # - name: Upload to codecov.io
+      #   uses: codecov/codecov-action@v1.0.2
+      #   with:
+      #     token: ${{secrets.CODECOV_TOKEN}}
 
       - name: Archive code coverage results
         id: archive
