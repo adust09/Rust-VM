@@ -29,13 +29,13 @@ jobs:
           command: fmt
           args: --all -- --check
 
-      # - name: Lint
-      #   id: lint
-      #   if: ${{ always() }}
-      #   uses: actions-rs/cargo@v1
-      #   with:
-      #     command: clippy
-      #     args: --all-targets --all-features -- -D warnings
+      - name: Lint
+        id: lint
+        if: ${{ always() }}
+        uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+          args: --all-targets --all-features -- -D warnings
 
       - name: Test
         id: test
@@ -45,26 +45,26 @@ jobs:
           command: test
           args: --all-features
 
-      - name: Run code coverage
-        id: coverage
-        if: ${{ always() }}
-        uses: actions-rs/tarpaulin@v0.1
-        with:
-          version: '0.15.0'
-          args: '-- --test-threads 1'
+      # - name: Run code coverage
+      #   id: coverage
+      #   if: ${{ always() }}
+      #   uses: actions-rs/tarpaulin@v0.1
+      #   with:
+      #     version: '0.15.0'
+      #     args: '-- --test-threads 1'
 
-      - name: Upload to codecov.io
-        uses: codecov/codecov-action@v1.0.2
-        with:
-          token: ${{secrets.CODECOV_TOKEN}}
+      # - name: Upload to codecov.io
+      #   uses: codecov/codecov-action@v1.0.2
+      #   with:
+      #     token: ${{secrets.CODECOV_TOKEN}}
 
-      - name: Archive code coverage results
-        id: archive
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v1
-        with:
-          name: code-coverage-report
-          path: cobertura.xml
+      # - name: Archive code coverage results
+      #   id: archive
+      #   if: ${{ always() }}
+      #   uses: actions/upload-artifact@v1
+      #   with:
+      #     name: code-coverage-report
+      #     path: cobertura.xml
 
       - name: Build
         id: build
