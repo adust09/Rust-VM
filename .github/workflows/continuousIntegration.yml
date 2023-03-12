@@ -22,6 +22,7 @@ jobs:
           components: rustfmt, clippy
           
       - name: Format
+        id: fmt
         uses: actions-rs/cargo@v1
         continue-on-error: true
         with:
@@ -29,6 +30,7 @@ jobs:
           args: --all -- --check
 
       - name: Lint
+        id: lint
         continue-on-error: true
         uses: actions-rs/cargo@v1
         with:
@@ -36,6 +38,7 @@ jobs:
           args: --all-targets --all-features -- -D warnings
 
       - name: Test
+        id: test
         continue-on-error: true
         uses: actions-rs/cargo@v1
         with:
@@ -43,6 +46,7 @@ jobs:
           args: --all-features
 
       - name: Run code coverage
+        id: coverage
         continue-on-error: true
         uses: actions-rs/tarpaulin@v0.1
         with:
@@ -50,6 +54,7 @@ jobs:
           args: '-- --test-threads 1'
 
       - name: Archive code coverage results
+        id: archive
         continue-on-error: true
         uses: actions/upload-artifact@v1
         with:
@@ -57,13 +62,15 @@ jobs:
           path: cobertura.xml
 
       - name: Build
+        id: build
         uses: actions-rs/cargo@v1
         continue-on-error: true
         with:
           command: build
           args: --verbose
 
-      - if: failure()
+      - if: steps.fmt.outcome == 'failure' || steps.clippy.outcome == 'failure' || 
+            steps.test.outcome == 'failure' || steps.build.outcome == 'failure' 
         uses: sarisia/actions-status-discord@v1
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
