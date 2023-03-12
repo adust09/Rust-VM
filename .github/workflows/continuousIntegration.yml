@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install formatter and Linter
         uses: actions-rs/toolchain@v1
-        continue-on-error: true
+        if: ${{ always() }}
         with:
           toolchain: stable
           components: rustfmt, clippy
@@ -24,14 +24,14 @@ jobs:
       - name: Format
         id: fmt
         uses: actions-rs/cargo@v1
-        continue-on-error: true
+        if: ${{ always() }}
         with:
           command: fmt
           args: --all -- --check
 
       - name: Lint
         id: lint
-        continue-on-error: true
+        if: ${{ always() }}
         uses: actions-rs/cargo@v1
         with:
           command: clippy
@@ -39,7 +39,7 @@ jobs:
 
       - name: Test
         id: test
-        continue-on-error: true
+        if: ${{ always() }}
         uses: actions-rs/cargo@v1
         with:
           command: test
@@ -47,7 +47,7 @@ jobs:
 
       - name: Run code coverage
         id: coverage
-        continue-on-error: true
+        if: ${{ always() }}
         uses: actions-rs/tarpaulin@v0.1
         with:
           version: '0.15.0'
@@ -55,7 +55,7 @@ jobs:
 
       - name: Archive code coverage results
         id: archive
-        continue-on-error: true
+        if: ${{ always() }}
         uses: actions/upload-artifact@v1
         with:
           name: code-coverage-report
@@ -64,14 +64,13 @@ jobs:
       - name: Build
         id: build
         uses: actions-rs/cargo@v1
-        continue-on-error: true
+        if: ${{ always() }}
         with:
           command: build
           args: --verbose
           
       - name: Error Handling
-        if: ${{ steps.fmt.outcome == 'failure' || steps.clippy.outcome == 'failure' || 
-            steps.test.outcome == 'failure' || steps.build.outcome == 'failure' }}
+        if: ${{ failure() }}
         uses: sarisia/actions-status-discord@v1
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
