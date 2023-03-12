@@ -14,11 +14,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          submodules: recursive
       - name: Install formatter and Linter
         uses: actions-rs/toolchain@v1
         if: ${{ always() }}
         with:
-          toolchain: stable
+          toolchain: nightly-2022-09-08
+          override: true
           components: rustfmt, clippy
           
       - name: Format
