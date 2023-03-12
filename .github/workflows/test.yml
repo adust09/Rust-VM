@@ -27,6 +27,7 @@ jobs:
         with:
           command: fmt
           args: --all -- --check
+
       - name: Lint
         continue-on-error: true
         uses: actions-rs/cargo@v1
@@ -68,7 +69,7 @@ jobs:
           command: build
           args: --verbose
 
-      - if: failure()
+      - if: success()
         uses: sarisia/actions-status-discord@v1
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
