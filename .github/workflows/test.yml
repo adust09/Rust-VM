@@ -28,8 +28,12 @@ jobs:
         with:
           command: clippy
           args: --all-targets --all-features -- -D warnings
-      - run: cargo test --verbose
-      - name: Run cargo-tarpaulin
+      - name: Test
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --all-features
+      - name: Run code coverage
         uses: actions-rs/tarpaulin@v0.1
         with:
           version: '0.15.0'
@@ -43,6 +47,8 @@ jobs:
         with:
           name: code-coverage-report
           path: cobertura.xml
+      - name: Build
+        run: cargo build --verbose
       - if: failure()
         uses: sarisia/actions-status-discord@v1
         with:
