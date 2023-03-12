@@ -63,7 +63,7 @@ jobs:
           command: build
           args: --verbose
 
-      - if: success()
+      - if: failure()
         uses: sarisia/actions-status-discord@v1
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
