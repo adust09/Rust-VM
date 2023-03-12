@@ -68,9 +68,10 @@ jobs:
         with:
           command: build
           args: --verbose
-
-      - if: steps.fmt.outcome == 'failure' || steps.clippy.outcome == 'failure' || 
-            steps.test.outcome == 'failure' || steps.build.outcome == 'failure' 
+          
+      - name: Error Handling
+        if: ${{ steps.fmt.outcome == 'failure' || steps.clippy.outcome == 'failure' || 
+            steps.test.outcome == 'failure' || steps.build.outcome == 'failure' }}
         uses: sarisia/actions-status-discord@v1
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
