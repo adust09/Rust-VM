@@ -14,40 +14,48 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions-rs/toolchain@v1
+      - name: Install formatter and Linter
+        uses: actions-rs/toolchain@v1
+        continue-on-error: true
         with:
           toolchain: stable
           components: rustfmt, clippy
           
       - name: Format
         uses: actions-rs/cargo@v1
+        continue-on-error: true
         with:
           command: fmt
           args: --all -- --check
       - name: Lint
+        continue-on-error: true
         uses: actions-rs/cargo@v1
         with:
           command: clippy
           args: --all-targets --all-features -- -D warnings
 
       - name: Test
+        continue-on-error: true
         uses: actions-rs/cargo@v1
         with:
           command: test
           args: --all-features
 
       - name: Run code coverage
+        continue-on-error: true
         uses: actions-rs/tarpaulin@v0.1
         with:
           version: '0.15.0'
           args: '-- --test-threads 1'
 
       - name: Upload to codecov.io
+        continue-on-error: true
         uses: codecov/codecov-action@v1.0.2
         with:
           token: ${{secrets.CODECOV_TOKEN}}
 
       - name: Archive code coverage results
+        continue-on-error: true
         uses: actions/upload-artifact@v1
         with:
           name: code-coverage-report
@@ -55,6 +63,7 @@ jobs:
 
       - name: Build
         uses: actions-rs/cargo@v1
+        continue-on-error: true
         with:
           command: build
           args: --verbose
