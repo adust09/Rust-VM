@@ -16,6 +16,7 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: recursive
+          
       - name: Install formatter and Linter
         uses: actions-rs/toolchain@v1
         if: ${{ always() }}
@@ -25,7 +26,6 @@ jobs:
           components: rustfmt, clippy
           
       - name: Format
-        id: fmt
         uses: actions-rs/cargo@v1
         if: ${{ always() }}
         with:
@@ -33,7 +33,6 @@ jobs:
           args: --all -- --check
 
       - name: Lint
-        id: lint
         if: ${{ always() }}
         uses: actions-rs/cargo@v1
         with:
@@ -41,15 +40,20 @@ jobs:
           args: --all-targets --all-features -- -D warnings
 
       - name: Test
-        id: test
         if: ${{ always() }}
         uses: actions-rs/cargo@v1
         with:
           command: test
           args: --all-features
 
+      - name: Build
+        uses: actions-rs/cargo@v1
+        if: ${{ always() }}
+        with:
+          command: build
+          args: --verbose
+
       # - name: Run code coverage
-      #   id: coverage
       #   if: ${{ always() }}
       #   uses: actions-rs/tarpaulin@v0.1
       #   with:
@@ -62,21 +66,12 @@ jobs:
       #     token: ${{secrets.CODECOV_TOKEN}}
 
       # - name: Archive code coverage results
-      #   id: archive
       #   if: ${{ always() }}
       #   uses: actions/upload-artifact@v1
       #   with:
       #     name: code-coverage-report
       #     path: cobertura.xml
-
-      - name: Build
-        id: build
-        uses: actions-rs/cargo@v1
-        if: ${{ always() }}
-        with:
-          command: build
-          args: --verbose
-          
+      
       - name: Error Handling
         if: ${{ failure() }}
         uses: sarisia/actions-status-discord@v1
