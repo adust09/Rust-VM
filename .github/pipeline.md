@@ -18,6 +18,7 @@
 2. レポジトリのSettings > Secrets and variables > Actions に移動し、New repository secretボタンを押す
 3. DISCORD_WEBHOOKを用意して、先ほどのWebhook URLをコピペする。AVATAR_URL(任意)も同様。
 >下の例では。AVATAR_URL：<https://github.githubassets.com/images/modules/logos_page/Octocat.png>を使ってます。
+>通知内容は変更可能です
 
 <img width="546" alt="audit_fail_notify" src="https://user-images.githubusercontent.com/47593288/224492431-54eb434a-d28b-4b9c-b071-3e5e651b80d1.png">
 
