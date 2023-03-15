@@ -24,6 +24,7 @@
 # TODO/Nice to have
 - Dependency Checkで検出された脆弱性を放置せざるをえない場合があるが、その解決策が示されるまでは手動で確認する必要があるので、この手間も削減できればいいな
 - 誰が失敗したのか特定し、メンションつけて通知できれば改修までの時間を節約できる。(Triggered byの部分)
+- Contenious_integrationは全てのブランチに対してつけたほうがいいかも
 - cacheを適応して高速化する
 - coverageの追加
 - cargo crevの追加
